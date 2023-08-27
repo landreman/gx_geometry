@@ -30,12 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip --version
 
-    - name: pwd
-      run: pwd
-
-    - name: ls
-      run: ls -l
-
     - name: Install python dependencies
       run: |
         pip install -r requirements.txt

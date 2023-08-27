@@ -1,14 +1,11 @@
+#!/usr/bin/env python
+
 import unittest
 import os
 import logging
 
 import numpy as np
-
-try:
-    import matplotlib
-    matplotlib_found = True
-except:
-    matplotlib_found = False
+import matplotlib
 
 from gx_geometry import Vmec, vmec_splines, vmec_compute_geometry, vmec_fieldlines, mu_0
 
@@ -311,7 +308,6 @@ class VmecFieldlinesTests(unittest.TestCase):
                                    fl.toroidal_flux_sign * (B0 / Aminor) * (-np.cos(theta) / R + phi * d_iota_d_r * eps * np.sin(theta)),
                                    atol=0.006)
 
-    @unittest.skipIf(not matplotlib_found, "Matplotlib python module not found")
     def test_plot(self):
         """
         Test the plotting function of vmec_fieldlines()
