@@ -453,19 +453,24 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
 
     gds2 = grad_alpha_dot_grad_alpha * L_reference * L_reference * s[:, None, None]
 
-    gds21 = grad_alpha_dot_grad_psi * shat[:, None, None] / B_reference
-
     gds22 = grad_psi_dot_grad_psi * shat[:, None, None] * shat[:, None, None] / (L_reference * L_reference * B_reference * B_reference * s[:, None, None])
 
-    # temporary fix. Please see issue #238 and the discussion therein
+    # For the following quantities, the sign is controvertial, so I'll comment
+    # out the lines from simsopt:
+    """
+    gds21 = grad_alpha_dot_grad_psi * shat[:, None, None] / B_reference
+
+    # See issue #238 and the discussion therein
     gbdrift = -1 * 2 * B_reference * L_reference * L_reference * sqrt_s[:, None, None] * B_cross_grad_B_dot_grad_alpha / (modB * modB * modB) * toroidal_flux_sign
 
     gbdrift0 = B_cross_grad_B_dot_grad_psi * 2 * shat[:, None, None] / (modB * modB * modB * sqrt_s[:, None, None]) * toroidal_flux_sign
 
-    # temporary fix. Please see issue #238 and the discussion therein
+    # See issue #238 and the discussion therein
     cvdrift = gbdrift - 2 * B_reference * L_reference * L_reference * sqrt_s[:, None, None] * mu_0 * d_pressure_d_s[:, None, None] * toroidal_flux_sign / (edge_toroidal_flux_over_2pi * modB * modB)
 
     cvdrift0 = gbdrift0
+    """
+
 
     # Package results into a structure to return:
     results = Struct()
@@ -485,7 +490,8 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
                  'B_cross_grad_B_dot_grad_psi', 'B_cross_kappa_dot_grad_psi', 'B_cross_kappa_dot_grad_alpha',
                  'grad_alpha_dot_grad_alpha', 'grad_alpha_dot_grad_psi', 'grad_psi_dot_grad_psi',
                  'L_reference', 'B_reference', 'toroidal_flux_sign',
-                 'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds21', 'gds22', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0']
+                 'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds22', 'sqrt_s']
+    #             'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds21', 'gds22', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0']
     for v in variables:
         results.__setattr__(v, eval(v))
 
@@ -648,7 +654,8 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
         variables = ['modB', 'B_sup_theta_pest', 'B_sup_phi', 'B_cross_grad_B_dot_grad_alpha', 'B_cross_grad_B_dot_grad_psi',
                      'B_cross_kappa_dot_grad_alpha', 'B_cross_kappa_dot_grad_psi',
                      'grad_alpha_dot_grad_alpha', 'grad_alpha_dot_grad_psi', 'grad_psi_dot_grad_psi',
-                     'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22']
+                     'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds22']
+        #             'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22']
         for j, variable in enumerate(variables):
             plt.subplot(nrows, ncols, j + 1)
             plt.plot(phi[0, 0, :], eval("results." + variable + '[0, 0, :]'))

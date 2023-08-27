@@ -1,11 +1,3 @@
-# This file is based on examples in
-# https://docs.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
-
-# Note that all the "sudo" commands here appear to cause a warning message
-# "sudo: setrlimit(RLIMIT_CORE): operation not permitted"
-# This appears to be a known harmless annoyance:
-# https://gitlab.alpinelinux.org/alpine/aports/-/issues/11122
-
 name: CI
 
 on: [push, pull_request]
@@ -26,7 +18,7 @@ jobs:
       run: pwd
 
     - name: ls
-      run: ls
+      run: ls -l
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -42,7 +34,7 @@ jobs:
       run: pwd
 
     - name: ls
-      run: ls
+      run: ls -l
 
     - name: Install python dependencies
       run: |

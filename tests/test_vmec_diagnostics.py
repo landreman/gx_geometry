@@ -10,7 +10,7 @@ try:
 except:
     matplotlib_found = False
 
-from gx_geometry import Vmec, vmec_splines, vmec_compute_geometry, vmec_fieldlines
+from gx_geometry import Vmec, vmec_splines, vmec_compute_geometry, vmec_fieldlines, mu_0
 
 from . import TEST_DIR
 
@@ -195,6 +195,11 @@ class VmecFieldlinesTests(unittest.TestCase):
                 np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_alpha, fl.B_cross_grad_B_dot_grad_alpha_alternate, atol=0.02)
 
                 # Check 2 ways of computing cvdrift:
+                # For this comparison, I'll use the definitions of
+                # gbdrift/cvdrift presently in simsospt, which may differ
+                # in sign from the definitions we want in gx.
+                fl.gbdrift = -1 * 2 * fl.B_reference * fl.L_reference * fl.L_reference * fl.sqrt_s[:, None, None] * fl.B_cross_grad_B_dot_grad_alpha / (fl.modB * fl.modB * fl.modB) * fl.toroidal_flux_sign
+                fl.cvdrift = fl.gbdrift - 2 * fl.B_reference * fl.L_reference * fl.L_reference * fl.sqrt_s[:, None, None] * mu_0 * fl.d_pressure_d_s[:, None, None] * fl.toroidal_flux_sign / (fl.edge_toroidal_flux_over_2pi *fl.modB * fl.modB)
                 cvdrift_alt = -1 * 2 * fl.B_reference * fl.L_reference * fl.L_reference \
                     * np.sqrt(fl.s)[:, None, None] * fl.B_cross_kappa_dot_grad_alpha \
                     / (fl.modB * fl.modB) * fl.toroidal_flux_sign
@@ -233,7 +238,7 @@ class VmecFieldlinesTests(unittest.TestCase):
         np.testing.assert_allclose(L_reference * fl.B_sup_phi[0, :, :] / fl.modB[0, :, :],
                                    gradpar_reference, rtol=1e-11, atol=1e-11)
 
-        # Compare to an output file from the stella geometry interface
+        # Compare to an output file from the stella geometry interface.        
         vmec = Vmec(os.path.join(TEST_DIR, 'wout_W7-X_without_coil_ripple_beta0p05_d23p4_tm_reference.nc'))
         s = [0.5]
         nalpha = 3
@@ -244,6 +249,23 @@ class VmecFieldlinesTests(unittest.TestCase):
             lines = f.readlines()
         np.testing.assert_allclose(fl.alpha, np.fromstring(lines[4], sep=' '))
         phi_stella = np.fromstring(lines[6], sep=' ')
+
+        # For this comparison, I'll use the definitions of
+        # gds21/gbdrift/gbdrift0/cvdrift presently in simsospt, which may differ
+        # in sign from the definitions we want in gx.
+
+        fl.gds21 = fl.grad_alpha_dot_grad_psi * fl.shat[:, None, None] / fl.B_reference
+
+        # See issue #238 and the discussion therein
+        fl.gbdrift = -1 * 2 * fl.B_reference * fl.L_reference * fl.L_reference * fl.sqrt_s[:, None, None] * fl.B_cross_grad_B_dot_grad_alpha / (fl.modB * fl.modB * fl.modB) * fl.toroidal_flux_sign
+
+        fl.gbdrift0 = fl.B_cross_grad_B_dot_grad_psi * 2 * fl.shat[:, None, None] / (fl.modB * fl.modB * fl.modB * fl.sqrt_s[:, None, None]) * fl.toroidal_flux_sign
+
+        # See issue #238 and the discussion therein
+        fl.cvdrift = fl.gbdrift - 2 * fl.B_reference * fl.L_reference * fl.L_reference * fl.sqrt_s[:, None, None] * mu_0 * fl.d_pressure_d_s[:, None, None] * fl.toroidal_flux_sign / (fl.edge_toroidal_flux_over_2pi *fl.modB * fl.modB)
+
+        fl.cvdrift0 = fl.gbdrift0
+
         for j in range(nalpha):
             np.testing.assert_allclose(fl.phi[0, j, :], phi_stella)
             np.testing.assert_allclose(fl.bmag[0, j, :], np.fromstring(lines[8 + j], sep=' '), rtol=1e-6)

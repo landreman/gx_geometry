@@ -1,3 +1,4 @@
+from .util import *
 from .vmec import *
 from .vmec_diagnostics import *
 
