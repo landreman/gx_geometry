@@ -81,7 +81,7 @@ def vmec_splines(vmec):
 
     # Save other useful quantities:
     results.phiedge = vmec.wout.phi[-1]
-    variables = ['Aminor_p', 'mnmax', 'xm', 'xn', 'mnmax_nyq', 'xm_nyq', 'xn_nyq', 'nfp']
+    variables = ['Aminor_p', 'Rmajor_p', 'mnmax', 'xm', 'xn', 'mnmax_nyq', 'xm_nyq', 'xn_nyq', 'nfp']
     for v in variables:
         results.__setattr__(v, eval('vmec.wout.' + v))
 
@@ -442,6 +442,7 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
 
     L_reference = vs.Aminor_p
     B_reference = 2 * abs(edge_toroidal_flux_over_2pi) / (L_reference * L_reference)
+    Rmajor_p = vs.Rmajor_p
     toroidal_flux_sign = np.sign(edge_toroidal_flux_over_2pi)
     sqrt_s = np.sqrt(s)
 
@@ -454,6 +455,8 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
     gds2 = grad_alpha_dot_grad_alpha * L_reference * L_reference * s[:, None, None]
 
     gds22 = grad_psi_dot_grad_psi * shat[:, None, None] * shat[:, None, None] / (L_reference * L_reference * B_reference * B_reference * s[:, None, None])
+
+    grho = np.sqrt(grad_psi_dot_grad_psi / (L_reference * L_reference * B_reference * B_reference * s[:, None, None]))
 
     # For the following quantities, the sign is controvertial, so I'll comment
     # out the lines from simsopt:
@@ -490,7 +493,7 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
                  'B_cross_grad_B_dot_grad_psi', 'B_cross_kappa_dot_grad_psi', 'B_cross_kappa_dot_grad_alpha',
                  'grad_alpha_dot_grad_alpha', 'grad_alpha_dot_grad_psi', 'grad_psi_dot_grad_psi',
                  'L_reference', 'B_reference', 'toroidal_flux_sign',
-                 'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds22', 'sqrt_s']
+                 'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds22', 'sqrt_s', 'grho', 'Rmajor_p']
     #             'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gds2', 'gds21', 'gds22', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0']
     for v in variables:
         results.__setattr__(v, eval(v))

@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib
 
 from gx_geometry.util import Struct
-from gx_geometry import uniform_arclength, Vmec, vmec_fieldlines
+from gx_geometry import uniform_arclength, Vmec, vmec_fieldlines, add_gx_definitions, write_eik
 
 from . import TEST_DIR
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 
 
-class Tests(unittest.TestCase):
+class UniformArclengthTests(unittest.TestCase):
     def test_unchanged(self):
         """If you start with a uniform arclength grid, nothing should change."""
         fl1 = Struct()
@@ -90,6 +90,22 @@ class Tests(unittest.TestCase):
                 np.testing.assert_allclose(fl2.D @ (fl1.z[js, jalpha, :] +
                 np.pi), rhs)
         """
+
+class WriteEikTests(unittest.TestCase):
+    def test_write_eik(self):
+        filename = "wout_w7x_from_gx_repository.nc"
+        vmec = Vmec(os.path.join(TEST_DIR, filename))
+        s = 0.64
+        alpha = 0
+        nl = 49
+        theta1d = np.linspace(-np.pi, np.pi, nl)
+        fl1 = vmec_fieldlines(vmec, s, alpha, theta1d=theta1d)
+        fl2 = uniform_arclength(fl1)
+        kxfac = -1.0
+        add_gx_definitions(fl2, kxfac)
+        eik_filename = "eik.out"
+        write_eik(fl2, eik_filename)
+
 
 if __name__ == "__main__":
     unittest.main()
