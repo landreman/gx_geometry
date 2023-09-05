@@ -10,7 +10,6 @@ def create_eik(filename, kxfac=1, s=0.64, alpha=0, nl=49):
     theta1d = np.linspace(-np.pi, np.pi, nl)
     fl1 = vmec_fieldlines(vmec, s, alpha, theta1d=theta1d)
     fl2 = uniform_arclength(fl1)
-    kxfac = -1.0
     add_gx_definitions(fl2, kxfac)
     eik_filename = "eik.out"
     write_eik(fl2, eik_filename)
