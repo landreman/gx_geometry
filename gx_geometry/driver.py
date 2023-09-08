@@ -5,7 +5,7 @@ from .vmec_diagnostics import vmec_fieldlines
 
 __all__ = ["create_eik"]
 
-def create_eik(filename, kxfac=1, s=0.64, alpha=0, nl=49):
+def create_eik(filename, kxfac=1.0, s=0.64, alpha=0, nl=49):
     vmec = Vmec(filename)
     theta1d = np.linspace(-np.pi, np.pi, nl)
     fl1 = vmec_fieldlines(vmec, s, alpha, theta1d=theta1d)

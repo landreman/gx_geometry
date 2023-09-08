@@ -279,34 +279,39 @@ class VmecFieldlinesTests(unittest.TestCase):
         """
         Test that vmec_fieldlines() gives sensible results for axisymmetry.
         """
-        vmec = Vmec(os.path.join(TEST_DIR, 'wout_circular_tokamak_aspect_100_reference.nc'))
-        theta = np.linspace(-3 * np.pi, 3 * np.pi, 200)
-        fl = vmec_fieldlines(vmec, s=1, alpha=0, theta1d=theta, plot=0)
-        B0 = vmec.wout.volavgB
-        eps = 1 / vmec.wout.aspect
-        safety_factor_q = 1 / vmec.wout.iotaf[-1]
-        phi = theta / vmec.wout.iotaf[-1]
-        R = vmec.wout.Rmajor_p
-        Aminor = vmec.wout.Aminor_p
-        d_iota_d_s = (vmec.wout.iotas[-1] - vmec.wout.iotas[-2]) / vmec.ds
-        d_iota_d_r = d_iota_d_s * Aminor / 2
-        #print('sign of psi in grad psi cross grad theta + iota grad phi cross grad psi:', fl.toroidal_flux_sign)
+        filenames = [
+            "wout_circular_tokamak_aspect_100_phiedgePositive_reference.nc",
+            "wout_circular_tokamak_aspect_100_phiedgeNegative_reference.nc",
+        ]
+        for filename in filenames:
+            vmec = Vmec(os.path.join(TEST_DIR, filename))
+            theta = np.linspace(-3 * np.pi, 3 * np.pi, 200)
+            fl = vmec_fieldlines(vmec, s=1, alpha=0, theta1d=theta, plot=0)
+            B0 = vmec.wout.volavgB
+            eps = 1 / vmec.wout.aspect
+            safety_factor_q = 1 / vmec.wout.iotaf[-1]
+            phi = theta / vmec.wout.iotaf[-1]
+            R = vmec.wout.Rmajor_p
+            Aminor = vmec.wout.Aminor_p
+            d_iota_d_s = (vmec.wout.iotas[-1] - vmec.wout.iotas[-2]) / vmec.ds
+            d_iota_d_r = d_iota_d_s * Aminor / 2
+            #print('sign of psi in grad psi cross grad theta + iota grad phi cross grad psi:', fl.toroidal_flux_sign)
 
-        # See Matt Landreman's note "20220315-02 Geometry arrays for gyrokinetics in a circular tokamak.docx"
-        # for the analytic results below
-        np.testing.assert_allclose(fl.modB.flatten(), B0 * (1 - eps * np.cos(theta)), rtol=0.0002)
-        np.testing.assert_allclose(fl.B_sup_theta_vmec.flatten(), B0 / (safety_factor_q * R), rtol=0.0006)
-        np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_psi.flatten(), -(B0 ** 3) * eps * np.sin(theta), rtol=0.03)
-        np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_psi.flatten(), -(B0 ** 2) * eps * np.sin(theta), rtol=0.02)
-        np.testing.assert_allclose(fl.grad_psi_dot_grad_psi.flatten(), B0 * B0 * Aminor * Aminor, rtol=0.03)
-        np.testing.assert_allclose(fl.grad_alpha_dot_grad_psi.flatten(), -fl.toroidal_flux_sign * phi * d_iota_d_r * Aminor * B0, rtol=0.02)
-        np.testing.assert_allclose(fl.grad_alpha_dot_grad_alpha.flatten(), 1 / (Aminor * Aminor) + (phi * phi * d_iota_d_r * d_iota_d_r), rtol=0.04)
-        np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_alpha.flatten(),
-                                   fl.toroidal_flux_sign * (B0 * B0 / Aminor) * (-np.cos(theta) / R + phi * d_iota_d_r * eps * np.sin(theta)),
-                                   atol=0.006)
-        np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_alpha.flatten(),
-                                   fl.toroidal_flux_sign * (B0 / Aminor) * (-np.cos(theta) / R + phi * d_iota_d_r * eps * np.sin(theta)),
-                                   atol=0.006)
+            # See Matt Landreman's note "20220315-02 Geometry arrays for gyrokinetics in a circular tokamak.docx"
+            # for the analytic results below
+            np.testing.assert_allclose(fl.modB.flatten(), B0 * (1 - eps * np.cos(theta)), rtol=0.0002)
+            np.testing.assert_allclose(fl.B_sup_theta_vmec.flatten(), -fl.toroidal_flux_sign * B0 / (safety_factor_q * R), rtol=0.0006)
+            np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_psi.flatten(), -(B0 ** 3) * eps * np.sin(theta), rtol=0.03)
+            np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_psi.flatten(), -(B0 ** 2) * eps * np.sin(theta), rtol=0.02)
+            np.testing.assert_allclose(fl.grad_psi_dot_grad_psi.flatten(), B0 * B0 * Aminor * Aminor, rtol=0.03)
+            np.testing.assert_allclose(fl.grad_alpha_dot_grad_psi.flatten(), -fl.toroidal_flux_sign * phi * d_iota_d_r * Aminor * B0, rtol=0.02)
+            np.testing.assert_allclose(fl.grad_alpha_dot_grad_alpha.flatten(), 1 / (Aminor * Aminor) + (phi * phi * d_iota_d_r * d_iota_d_r), rtol=0.04)
+            np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_alpha.flatten(),
+                                    fl.toroidal_flux_sign * (B0 * B0 / Aminor) * (-np.cos(theta) / R + phi * d_iota_d_r * eps * np.sin(theta)),
+                                    atol=0.006)
+            np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_alpha.flatten(),
+                                    fl.toroidal_flux_sign * (B0 / Aminor) * (-np.cos(theta) / R + phi * d_iota_d_r * eps * np.sin(theta)),
+                                    atol=0.006)
 
     def test_plot(self):
         """
