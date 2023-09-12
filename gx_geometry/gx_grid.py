@@ -1,10 +1,9 @@
 import copy
 import numpy as np
-from scipy.linalg import lu_factor, lu_solve
 from scipy.interpolate import interp1d
-from .util import differentiation_matrix, mu_0
+from .util import mu_0
 
-__all__ = ["uniform_arclength", "add_gx_definitions", "write_eik"]
+__all__ = ["uniform_arclength", "add_gx_definitions"]
 
 def uniform_arclength(fl1):
     """
@@ -118,37 +117,3 @@ def add_gx_definitions(fl, kxfac):
     fl.cvdrift0 = fl.gbdrift0
 
     return fl
-
-def write_eik(fl, filename):
-    """
-    Write an eik file that GX can read.
-    
-    Args:
-        fl: A structure with data on a field line.
-        filename: Name of the eik file to write.
-    """
-    nperiod = 1
-    assert fl.nl % 2 == 1
-    ntheta = fl.nl - 1
-    ntgrid = int(ntheta / 2)
-    kxfac = fl.kxfac
-    drhodpsi = 1.0
-    rmaj = fl.Rmajor_p
-    shat = fl.shat[0]
-    q = 1 / fl.iota[0]
-    scale = 1.0
-    with open(filename, "w") as f:
-        f.write(f"ntgrid nperiod ntheta drhodpsi rmaj shat kxfac q scale\n")
-        f.write(f"{ntgrid} {nperiod} {ntheta} {drhodpsi} {rmaj} {shat} {kxfac} {q} {scale}\n")
-        f.write(f"gbdrift  gradpar         grho    tgrid\n")
-        for j in range(fl.nl):
-            f.write(f"{fl.gbdrift[0, 0, j]:23} {fl.gradpar[0, 0, j]:23} {fl.grho[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
-        f.write(f"cvdrift  gds2    bmag    tgrid\n")
-        for j in range(fl.nl):
-            f.write(f"{fl.cvdrift[0, 0, j]:23} {fl.gds2[0, 0, j]:23} {fl.bmag[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
-        f.write(f"gds21    gds22   tgrid\n")
-        for j in range(fl.nl):
-            f.write(f"{fl.gds21[0, 0, j]:23} {fl.gds22[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
-        f.write(f"cvdrift0         gbdrift0        tgrid\n")
-        for j in range(fl.nl):
-            f.write(f"{fl.cvdrift0[0, 0, j]:23} {fl.gbdrift0[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")

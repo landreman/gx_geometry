@@ -1,5 +1,6 @@
 import numpy as np
-from .gx_grid import uniform_arclength, add_gx_definitions, write_eik
+from .gx_grid import uniform_arclength, add_gx_definitions
+from .eik_files import write_eik
 from .vmec import Vmec
 from .vmec_diagnostics import vmec_fieldlines
 
