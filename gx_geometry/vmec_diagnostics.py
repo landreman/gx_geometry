@@ -645,7 +645,7 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
     results = vmec_compute_geometry(vs, s, theta_vmec, phi, phi_center)
 
     # Add a few more quantities to the results:
-    variables = ["nalpha", "nl", "alpha", "theta1d", "phi1d"]
+    variables = ["nalpha", "nl", "alpha", "theta1d", "phi1d", "phi"]
     for v in variables:
         results.__setattr__(v, eval(v))
 
