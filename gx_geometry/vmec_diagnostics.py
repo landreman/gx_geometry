@@ -525,15 +525,12 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
     function for details.
 
     Most of the arrays that are returned by this function have shape
-    ``(ns, nalpha, nl)``, where ``ns`` is the number of flux surfaces,
-    ``nalpha`` is the number of field lines on each flux surface, and
-    ``nl`` is the number of grid points along each field line. In
-    other words, ``ns`` is the size of the input ``s`` array,
-    ``nalpha`` is the size of the input ``alpha`` array, and ``nl`` is
+    ``(nl,)``, where  ``nl`` is the number of grid points along each field line. In
+    other words, ``nl`` is
     the size of the input ``theta1d`` or ``phi1d`` array. The output
     arrays are returned as attributes of the returned object.
 
-    The value(s) of ``s`` provided as input need not coincide with the
+    The value of ``s`` provided as input need not coincide with the
     full grid or half grid in VMEC, as spline interpolation will be
     used radially.
 
@@ -550,10 +547,8 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
     Args:
         vs: Either an instance of :obj:`simsopt.mhd.vmec.Vmec`
           or the structure returned by :func:`vmec_splines`.
-        s: Values of normalized toroidal flux on which to construct the field lines.
-          You can give a single number, or a list or numpy array.
-        alpha: Values of the field line label :math:`\alpha` on which to construct the field lines.
-          You can give a single number, or a list or numpy array.
+        s: Value of normalized toroidal flux on which to construct the field line.
+        alpha: Value of the field line label :math:`\alpha` on which to construct the field line.
         theta1d: 1D array of :math:`\theta_{pest}` values, setting the grid points
           along the field line and the parallel extent of the field line.
         phi1d: 1D array of :math:`\phi` values, setting the grid points along the
@@ -570,18 +565,12 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
         vs = vmec_splines(vs)
 
     # Make sure s is an array:
-    try:
-        ns = len(s)
-    except:
-        s = [s]
+    s = [s]
     s = np.array(s)
     ns = len(s)
 
     # Make sure alpha is an array
-    try:
-        nalpha = len(alpha)
-    except:
-        alpha = [alpha]
+    alpha = [alpha]
     alpha = np.array(alpha)
     nalpha = len(alpha)
 
@@ -649,6 +638,17 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
     for v in variables:
         results.__setattr__(v, eval(v))
 
+    # Convert all 1D arrays to scalars, and 3D quantities to 1D:
+    for attr in dir(results):
+        if attr[0] == "_":
+            continue
+        var = results.__getattribute__(attr)
+        if isinstance(var, np.ndarray):
+            if var.ndim == 1 and attr not in ["theta1d", "phi1d"]:
+                results.__setattr__(attr, var[0])
+            if var.ndim == 3:
+                results.__setattr__(attr, var.flatten())
+
     if plot:
         import matplotlib.pyplot as plt
         plt.figure(figsize=(13, 7))
@@ -661,11 +661,11 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
         #             'bmag', 'gradpar_theta_pest', 'gradpar_phi', 'gbdrift', 'gbdrift0', 'cvdrift', 'cvdrift0', 'gds2', 'gds21', 'gds22']
         for j, variable in enumerate(variables):
             plt.subplot(nrows, ncols, j + 1)
-            plt.plot(phi[0, 0, :], eval("results." + variable + '[0, 0, :]'))
+            plt.plot(results.phi, eval("results." + variable))
             plt.xlabel('Standard toroidal angle $\phi$')
             plt.title(variable)
 
-        plt.figtext(0.5, 0.995, f's={s[0]}, alpha={alpha[0]}', ha='center', va='top')
+        plt.figtext(0.5, 0.995, f's={s}, alpha={alpha}', ha='center', va='top')
         plt.tight_layout()
         if show:
             plt.show()

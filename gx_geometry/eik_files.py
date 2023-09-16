@@ -24,23 +24,23 @@ def read_eik(filename):
         fl.iota = 1 / float(line[7])
 
     data = np.loadtxt(filename, skiprows=3, max_rows=fl.nl)
-    fl.gbdrift = data[:, 0].reshape((1, 1, fl.nl))
-    fl.gradpar = data[:, 1].reshape((1, 1, fl.nl))
-    fl.grho = data[:, 2].reshape((1, 1, fl.nl))
-    fl.z = data[:, 3].reshape((1, 1, fl.nl))
+    fl.gbdrift = data[:, 0]
+    fl.gradpar = data[:, 1]
+    fl.grho = data[:, 2]
+    fl.z = data[:, 3]
 
     data = np.loadtxt(filename, skiprows=4 + fl.nl, max_rows=fl.nl)
-    fl.cvdrift = data[:, 0].reshape((1, 1, fl.nl))
-    fl.gds2 = data[:, 1].reshape((1, 1, fl.nl))
-    fl.bmag = data[:, 2].reshape((1, 1, fl.nl))
+    fl.cvdrift = data[:, 0]
+    fl.gds2 = data[:, 1]
+    fl.bmag = data[:, 2]
 
     data = np.loadtxt(filename, skiprows=5 + 2 * fl.nl, max_rows=fl.nl)
-    fl.gds21 = data[:, 0].reshape((1, 1, fl.nl))
-    fl.gds22 = data[:, 1].reshape((1, 1, fl.nl))
+    fl.gds21 = data[:, 0]
+    fl.gds22 = data[:, 1]
 
     data = np.loadtxt(filename, skiprows=6 + 3 * fl.nl, max_rows=fl.nl)
-    fl.cvdrift0 = data[:, 0].reshape((1, 1, fl.nl))
-    fl.gbdrift0 = data[:, 1].reshape((1, 1, fl.nl))
+    fl.cvdrift0 = data[:, 0]
+    fl.gbdrift0 = data[:, 1]
 
     return fl
 
@@ -60,21 +60,21 @@ def write_eik(fl, filename):
     kxfac = fl.kxfac
     drhodpsi = 1.0
     rmaj = fl.Rmajor_p
-    shat = fl.shat[0]
-    q = 1 / fl.iota[0]
+    shat = fl.shat
+    q = 1 / fl.iota
     scale = 1.0
     with open(filename, "w") as f:
         f.write(f"ntgrid nperiod ntheta drhodpsi rmaj shat kxfac q scale\n")
         f.write(f"{ntgrid} {nperiod} {ntheta} {drhodpsi} {rmaj} {shat} {kxfac} {q} {scale}\n")
         f.write(f"gbdrift  gradpar         grho    tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.gbdrift[0, 0, j]:23} {fl.gradpar[0, 0, j]:23} {fl.grho[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
+            f.write(f"{fl.gbdrift[j]:23} {fl.gradpar[j]:23} {fl.grho[j]:23} {fl.z[j]:23}\n")
         f.write(f"cvdrift  gds2    bmag    tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.cvdrift[0, 0, j]:23} {fl.gds2[0, 0, j]:23} {fl.bmag[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
+            f.write(f"{fl.cvdrift[j]:23} {fl.gds2[j]:23} {fl.bmag[j]:23} {fl.z[j]:23}\n")
         f.write(f"gds21    gds22   tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.gds21[0, 0, j]:23} {fl.gds22[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
+            f.write(f"{fl.gds21[j]:23} {fl.gds22[j]:23} {fl.z[j]:23}\n")
         f.write(f"cvdrift0         gbdrift0        tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.cvdrift0[0, 0, j]:23} {fl.gbdrift0[0, 0, j]:23} {fl.z[0, 0, j]:23}\n")
+            f.write(f"{fl.cvdrift0[j]:23} {fl.gbdrift0[j]:23} {fl.z[j]:23}\n")
