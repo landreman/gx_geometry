@@ -6,6 +6,8 @@ from .util import Struct
 def desc_fieldline(eq, s, alpha, theta1d):
     psi = eq.Psi / (2 * np.pi)
     rho = np.sqrt(s)
+
+    # Compute flux functions on the surface of interest:
     flux_function_keys = ["iota", "iota_r", "p_r", "a"]
     linear_grid = LinearGrid(rho=rho, M=34, N=35, NFP=eq.NFP)
     flux_functions = eq.compute(flux_function_keys, grid=linear_grid)
@@ -30,7 +32,7 @@ def desc_fieldline(eq, s, alpha, theta1d):
 
     field_line_keys = [
         "|B|", "|grad(psi)|^2", "grad(|B|)", "grad(alpha)", "grad(psi)",
-        "B", "grad(|B|)", "kappa",
+        "B", "grad(|B|)", "kappa", "B^theta", "B^zeta", "lambda_t", "lambda_z",
     ]
     data = eq.compute(field_line_keys, grid=grid)
 
@@ -39,6 +41,8 @@ def desc_fieldline(eq, s, alpha, theta1d):
     B_reference = 2 * np.abs(psi) / (L_reference**2)
 
     modB = data['|B|']
+    gradpar_theta_pest = L_reference * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"]) / data["|B|"]
+
     grad_psi_dot_grad_psi = data["|grad(psi)|^2"]
     grad_alpha_dot_grad_psi = dot(data["grad(alpha)"], data["grad(psi)"])
     grad_alpha_dot_grad_alpha = dot(data["grad(alpha)"], data["grad(alpha)"])
@@ -52,7 +56,8 @@ def desc_fieldline(eq, s, alpha, theta1d):
     variables = [
         "s", "rho", "nl", "theta_pest", "theta_desc", "theta_vmec", "zeta", "phi",
         "iota", "shat", "B_reference", "L_reference",
-        "modB", "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha",
+        "modB", "gradpar_theta_pest",
+        "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha",
         "B_cross_grad_B_dot_grad_psi", "B_cross_grad_B_dot_grad_alpha",
         "B_cross_kappa_dot_grad_psi", "B_cross_kappa_dot_grad_alpha",
     ]
