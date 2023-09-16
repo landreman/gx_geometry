@@ -71,24 +71,27 @@ class Tests(unittest.TestCase):
 
         # Jacobian of (rho, theta, phi) is negative for vmec, positive for desc,
         # as theta_desc = -theta_vmec. Therefore iota flips sign.
+
+        # Scalars:
         np.testing.assert_allclose(fl1.iota, -fl2.iota)
         np.testing.assert_allclose(fl1.shat, fl2.shat, rtol=0.0002)
-        np.testing.assert_allclose(fl1.theta_pest, fl2.theta_pest)
-        np.testing.assert_allclose(fl1.theta_desc, fl2.theta_vmec, rtol=0.006)
-        np.testing.assert_allclose(fl1.zeta, -fl2.phi)
-        np.testing.assert_allclose(fl1.modB, fl2.modB, rtol=0.008)
         np.testing.assert_allclose(fl1.L_reference, fl2.L_reference)
         np.testing.assert_allclose(fl1.B_reference, fl2.B_reference)
-        #show_diffs(fl1.gradpar_theta_pest, -fl2.gradpar_theta_pest)
-        np.testing.assert_allclose(fl1.gradpar_theta_pest, -fl2.gradpar_theta_pest, rtol=0.001)
-        np.testing.assert_allclose(fl1.grad_psi_dot_grad_psi, fl2.grad_psi_dot_grad_psi, rtol=0.01)
-        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_psi, -fl2.grad_alpha_dot_grad_psi, atol=0.2)
-        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_alpha, fl2.grad_alpha_dot_grad_alpha, atol=0.06)
-        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_psi, fl2.B_cross_grad_B_dot_grad_psi, rtol=0.1, atol=1.3)
-        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_psi, fl2.B_cross_kappa_dot_grad_psi, atol=0.04)
-        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_alpha, -fl2.B_cross_grad_B_dot_grad_alpha, atol=0.75)
-        #show_diffs(fl1.B_cross_kappa_dot_grad_alpha, -fl2.B_cross_kappa_dot_grad_alpha)
-        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_alpha, -fl2.B_cross_kappa_dot_grad_alpha, atol=0.006)
+
+        # Quantities that vary along a field line:
+        np.testing.assert_allclose(fl1.theta_pest, -np.flip(fl2.theta_pest))
+        np.testing.assert_allclose(fl1.theta_desc, -np.flip(fl2.theta_vmec), rtol=0.006)
+        np.testing.assert_allclose(fl1.zeta, np.flip(fl2.phi))
+        np.testing.assert_allclose(fl1.modB, np.flip(fl2.modB), rtol=0.008)
+        #show_diffs(fl1.gradpar_theta_pest, np.flip(fl2.gradpar_theta_pest))
+        np.testing.assert_allclose(fl1.gradpar_theta_pest, -np.flip(fl2.gradpar_theta_pest), rtol=0.001)
+        np.testing.assert_allclose(fl1.grad_psi_dot_grad_psi, np.flip(fl2.grad_psi_dot_grad_psi), rtol=0.01)
+        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_psi, np.flip(fl2.grad_alpha_dot_grad_psi), atol=0.2)
+        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_alpha, np.flip(fl2.grad_alpha_dot_grad_alpha), atol=0.06)
+        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_psi, -np.flip(fl2.B_cross_grad_B_dot_grad_psi), rtol=0.1, atol=1.3)
+        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_psi, -np.flip(fl2.B_cross_kappa_dot_grad_psi), atol=0.04)
+        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_alpha, -np.flip(fl2.B_cross_grad_B_dot_grad_alpha), atol=0.75)
+        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_alpha, -np.flip(fl2.B_cross_kappa_dot_grad_alpha), atol=0.006)
 
 
 if __name__ == "__main__":
