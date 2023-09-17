@@ -54,6 +54,8 @@ def desc_fieldline(eq, s, alpha, theta1d):
     grad_alpha_dot_grad_psi = np.array(dot(data["grad(alpha)"], data["grad(psi)"]))
     grad_alpha_dot_grad_alpha = np.array(dot(data["grad(alpha)"], data["grad(alpha)"]))
 
+    grho = np.sqrt(grad_psi_dot_grad_psi / (L_reference * L_reference * B_reference * B_reference * s))
+
     B_cross_grad_B_dot_grad_psi = np.array(dot(cross(data["B"], data["grad(|B|)"]), data["grad(psi)"]))
     B_cross_grad_B_dot_grad_alpha = np.array(dot(cross(data["B"], data["grad(|B|)"]), data["grad(alpha)"]))
     B_cross_kappa_dot_grad_psi = np.array(dot(cross(data["B"], data["kappa"]), data["grad(psi)"]))
@@ -64,7 +66,7 @@ def desc_fieldline(eq, s, alpha, theta1d):
         "s", "rho", "nl", "theta_pest", "theta_desc", "theta_vmec", "zeta", "phi", "edge_toroidal_flux_over_2pi",
         "iota", "shat", "B_reference", "L_reference", "toroidal_flux_sign", "sqrt_s",
         "modB", "gradpar_theta_pest", "d_pressure_d_s",
-        "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha",
+        "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha", "grho",
         "B_cross_grad_B_dot_grad_psi", "B_cross_grad_B_dot_grad_alpha",
         "B_cross_kappa_dot_grad_psi", "B_cross_kappa_dot_grad_alpha",
     ]

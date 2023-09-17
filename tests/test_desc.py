@@ -87,6 +87,7 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl1.modB, np.flip(fl2.modB), rtol=0.008)
         #show_diffs(fl1.gradpar_theta_pest, np.flip(fl2.gradpar_theta_pest))
         np.testing.assert_allclose(fl1.gradpar_theta_pest, -np.flip(fl2.gradpar_theta_pest), rtol=0.001)
+        np.testing.assert_allclose(fl1.grho, np.flip(fl2.grho), rtol=0.01)
         np.testing.assert_allclose(fl1.grad_psi_dot_grad_psi, np.flip(fl2.grad_psi_dot_grad_psi), rtol=0.01)
         np.testing.assert_allclose(fl1.grad_alpha_dot_grad_psi, np.flip(fl2.grad_alpha_dot_grad_psi), atol=0.2)
         np.testing.assert_allclose(fl1.grad_alpha_dot_grad_alpha, np.flip(fl2.grad_alpha_dot_grad_alpha), atol=0.06)
@@ -146,6 +147,7 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl3.zeta, np.flip(fl4.phi), atol=0.0002)
         np.testing.assert_allclose(fl3.modB, np.flip(fl4.modB), rtol=0.008)
         np.testing.assert_allclose(fl3.gradpar_theta_pest, -np.flip(fl4.gradpar_theta_pest), rtol=0.001)
+        np.testing.assert_allclose(fl3.grho, np.flip(fl4.grho), rtol=0.01)
         np.testing.assert_allclose(fl3.grad_psi_dot_grad_psi, np.flip(fl4.grad_psi_dot_grad_psi), rtol=0.01)
         np.testing.assert_allclose(fl3.grad_alpha_dot_grad_psi, np.flip(fl4.grad_alpha_dot_grad_psi), atol=0.2)
         np.testing.assert_allclose(fl3.grad_alpha_dot_grad_alpha, np.flip(fl4.grad_alpha_dot_grad_alpha), atol=0.06)
@@ -155,7 +157,11 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha), atol=0.82)
         np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_alpha, -np.flip(fl4.B_cross_kappa_dot_grad_alpha), atol=0.006)
 
-    
+        # Now test quantities added by add_gx_definitions:
+        # gds21, gbdrift, gbdrift0, cvdrift, and cvdrift0
+        #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+        #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+
 
 if __name__ == "__main__":
     unittest.main()
