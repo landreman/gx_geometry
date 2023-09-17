@@ -157,10 +157,41 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha), atol=0.82)
         np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_alpha, -np.flip(fl4.B_cross_kappa_dot_grad_alpha), atol=0.006)
 
-        # Now test quantities added by add_gx_definitions:
-        # gds21, gbdrift, gbdrift0, cvdrift, and cvdrift0
-        #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
-        #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+        # Now test GX quantities
+        if False:
+            plt.figure(figsize=(14, 7.5))
+            nrows = 3
+            ncols = 3
+            jplot = 1
+            def compare_vmec_desc(field, signflip=1):
+                nonlocal jplot
+                plt.subplot(nrows, ncols, jplot)
+                jplot = jplot + 1
+                plt.plot(fl3.__getattribute__(field), label="desc")
+                plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
+                plt.title(field)
+            compare_vmec_desc("z", signflip=-1)
+            compare_vmec_desc("gradpar", signflip=-1)
+            compare_vmec_desc("gds2", signflip=1)
+            compare_vmec_desc("gds21", signflip=1)
+            compare_vmec_desc("gds22", signflip=1)
+            compare_vmec_desc("gbdrift", signflip=1)
+            compare_vmec_desc("cvdrift", signflip=1)
+            compare_vmec_desc("gbdrift0", signflip=1)
+            compare_vmec_desc("cvdrift0", signflip=1)
+            plt.tight_layout()
+            plt.legend(loc=0, fontsize=7)
+            plt.show()
+
+        np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+        np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=1e-5)
+        np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), rtol=0.04)
+        np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), rtol=0.01)
+        np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=1e-4)
+        np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.07)
+        np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.07)
+        np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
+        np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
 
 
 if __name__ == "__main__":
