@@ -34,7 +34,9 @@ def desc_fieldline(eq, s, alpha, theta1d):
     coords = eq.compute_theta_coords(c, tol=1e-10, maxiter=50)
     theta_desc = np.array(coords[:, 1])
     theta_vmec = theta_desc
-    grid = Grid(coords)
+    # In next line, if we don't set sort=False, desc flips the direction of the
+    # grid when iota < 0!
+    grid = Grid(coords, sort=False)
 
     field_line_keys = [
         "|B|", "|grad(psi)|^2", "grad(|B|)", "grad(alpha)", "grad(psi)",

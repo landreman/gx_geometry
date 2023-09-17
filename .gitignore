@@ -133,3 +133,13 @@ dmypy.json
 .pymon
 
 *.out
+threed*
+jxbout*
+mercier*
+parvmecinfo.txt
+timings.txt
+
+w7x_from_gx_repository_LMN4.h5
+w7x_from_gx_repository_LMN6.h5
+wout_w7x_from_gx_repository_lowRes.nc
+desc_w7x_from_gx_repository_lowRes*

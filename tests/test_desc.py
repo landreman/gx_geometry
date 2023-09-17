@@ -7,6 +7,7 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from desc.vmec import VMECIO
+import desc.io
 
 from gx_geometry import desc_fieldline, Vmec, vmec_fieldline, uniform_arclength, add_gx_definitions
 
@@ -119,14 +120,14 @@ class Tests(unittest.TestCase):
                 plt.xlabel("theta_pest")
                 plt.title(field)
             compare_vmec_desc("modB", signflip=1)
-            compare_vmec_desc("theta_vmec", signflip=1)
-            compare_vmec_desc("phi", signflip=-1)
+            compare_vmec_desc("theta_vmec", signflip=-1)
+            compare_vmec_desc("phi", signflip=1)
             compare_vmec_desc("gradpar_theta_pest", signflip=-1)
             compare_vmec_desc("grad_psi_dot_grad_psi", signflip=1)
-            compare_vmec_desc("grad_alpha_dot_grad_psi", signflip=-1)
+            compare_vmec_desc("grad_alpha_dot_grad_psi", signflip=1)
             compare_vmec_desc("grad_alpha_dot_grad_alpha", signflip=1)
-            compare_vmec_desc("B_cross_grad_B_dot_grad_psi", signflip=1)
-            compare_vmec_desc("B_cross_kappa_dot_grad_psi", signflip=1)
+            compare_vmec_desc("B_cross_grad_B_dot_grad_psi", signflip=-1)
+            compare_vmec_desc("B_cross_kappa_dot_grad_psi", signflip=-1)
             compare_vmec_desc("B_cross_grad_B_dot_grad_alpha", signflip=-1)
             compare_vmec_desc("B_cross_kappa_dot_grad_alpha", signflip=-1)
             plt.tight_layout()
@@ -193,6 +194,95 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
         np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
 
+    def test_vmec_desc_benchmark_nonzero_alpha(self):     
+        """
+        This test covers lots of items: a non-symmetric flux tube (nonzero
+        alpha), nonzero beta, and >1 poloidal turn.
+        """   
+        filename_base = "wout_w7x_from_gx_repository.nc"
+        filename = os.path.join(TEST_DIR, filename_base)
+        vmec = Vmec(filename)
+        
+        # For this configuration, VMECIO.load-ing the wout file was not accurate
+        # enough - I needed to call eq.solve(), after lowering the resolution.
+        filename_base = "w7x_from_gx_repository_LMN8.h5"
+        filename = os.path.join(TEST_DIR, filename_base)
+        eq = desc.io.load(filename)
+
+        s = 0.9
+        alpha_vmec = 1.5
+        alpha_desc = -alpha_vmec
+        ntheta = 201
+        theta1d = np.linspace(-2 * np.pi, 2 * np.pi, ntheta)
+        fl1 = desc_fieldline(eq, s, alpha_desc, theta1d=theta1d)
+        fl2 = vmec_fieldline(vmec, s, alpha_vmec, theta1d=theta1d)
+
+        plot_all_quantities = True
+        if plot_all_quantities:
+            plt.figure(figsize=(14, 7.5))
+            nrows = 3
+            ncols = 4
+            jplot = 1
+            def compare_vmec_desc(field, signflip=1):
+                nonlocal jplot
+                plt.subplot(nrows, ncols, jplot)
+                jplot = jplot + 1
+                #plt.plot(fl1.theta_pest, fl1.__getattribute__(field), label="desc")
+                #plt.plot(fl2.theta_pest, np.flip(fl2.__getattribute__(field)) * signflip, label="vmec")
+                plt.plot(fl1.__getattribute__(field), label="desc")
+                plt.plot(np.flip(fl2.__getattribute__(field)) * signflip, label="vmec")
+                #plt.xlabel("theta_pest")
+                plt.title(field)
+            compare_vmec_desc("modB", signflip=1)
+            compare_vmec_desc("theta_vmec", signflip=-1)
+            compare_vmec_desc("phi", signflip=1)
+            compare_vmec_desc("gradpar_theta_pest", signflip=-1)
+            compare_vmec_desc("grad_psi_dot_grad_psi", signflip=1)
+            compare_vmec_desc("grad_alpha_dot_grad_psi", signflip=1)
+            compare_vmec_desc("grad_alpha_dot_grad_alpha", signflip=1)
+            compare_vmec_desc("B_cross_grad_B_dot_grad_psi", signflip=-1)
+            compare_vmec_desc("B_cross_kappa_dot_grad_psi", signflip=-1)
+            compare_vmec_desc("B_cross_grad_B_dot_grad_alpha", signflip=-1)
+            compare_vmec_desc("B_cross_kappa_dot_grad_alpha", signflip=-1)
+            plt.tight_layout()
+            plt.legend(loc=0, fontsize=7)
+            plt.figtext(0.5, 0.995, "Before uniform arclength", ha="center", va="top", fontsize=9)
+            plt.show()
+
+        np.set_printoptions(linewidth=400)
+        def show_diffs(field1, field2):
+            print("abs diff:", np.abs(field1 - field2))
+            print("rel diff:", np.abs(field1 - field2) / (0.5 * (field1 + field2)))
+            plt.figure()
+            plt.semilogy(np.abs(field1 - field2), label="abs")
+            plt.plot(np.abs((field1 - field2) / (0.5 * (field1 + field2))), label="rel")
+            plt.legend(loc=0, fontsize=6)
+            plt.show()
+
+        # To understand all the signs below, see section 6 of
+        # 20230910-01 Signs in GX geometry.lyx
+
+        # Scalars:
+        np.testing.assert_allclose(fl1.iota, -fl2.iota, rtol=1e-6)
+        np.testing.assert_allclose(fl1.shat, fl2.shat, rtol=0.0002)
+        np.testing.assert_allclose(fl1.L_reference, fl2.L_reference)
+        np.testing.assert_allclose(fl1.B_reference, fl2.B_reference)
+
+        # Quantities that vary along a field line:
+        np.testing.assert_allclose(fl1.theta_pest, -np.flip(fl2.theta_pest), atol=1e-13)
+        np.testing.assert_allclose(fl1.theta_desc, -np.flip(fl2.theta_vmec), rtol=0.06)
+        np.testing.assert_allclose(fl1.zeta, np.flip(fl2.phi), atol=6e-6)
+        np.testing.assert_allclose(fl1.modB, np.flip(fl2.modB), atol=0.003)
+        #show_diffs(fl1.gradpar_theta_pest, np.flip(fl2.gradpar_theta_pest))
+        np.testing.assert_allclose(fl1.gradpar_theta_pest, -np.flip(fl2.gradpar_theta_pest), rtol=0.001)
+        np.testing.assert_allclose(fl1.grho, np.flip(fl2.grho), atol=0.08)
+        np.testing.assert_allclose(fl1.grad_psi_dot_grad_psi, np.flip(fl2.grad_psi_dot_grad_psi), rtol=0.07)
+        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_psi, np.flip(fl2.grad_alpha_dot_grad_psi), atol=1.2)
+        np.testing.assert_allclose(fl1.grad_alpha_dot_grad_alpha, np.flip(fl2.grad_alpha_dot_grad_alpha), atol=1.96)
+        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_psi, -np.flip(fl2.B_cross_grad_B_dot_grad_psi), atol=0.12)
+        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_psi, -np.flip(fl2.B_cross_kappa_dot_grad_psi), atol=0.038)
+        np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_alpha, -np.flip(fl2.B_cross_grad_B_dot_grad_alpha), atol=0.51)
+        np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_alpha, -np.flip(fl2.B_cross_kappa_dot_grad_alpha), atol=0.18)
 
 if __name__ == "__main__":
     unittest.main()
