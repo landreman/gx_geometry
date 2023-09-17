@@ -12,8 +12,10 @@ def desc_fieldline(eq, s, alpha, theta1d):
     sqrt_s = rho
     edge_toroidal_flux_over_2pi = psi
 
+    global_quantities = eq.compute(["a", "R0"])
+
     # Compute flux functions on the surface of interest:
-    flux_function_keys = ["iota", "iota_r", "p_r", "a"]
+    flux_function_keys = ["iota", "iota_r", "p_r"]
     linear_grid = LinearGrid(rho=rho, M=34, N=35, NFP=eq.NFP)
     flux_functions = eq.compute(flux_function_keys, grid=linear_grid)
 
@@ -44,12 +46,13 @@ def desc_fieldline(eq, s, alpha, theta1d):
     ]
     data = eq.compute(field_line_keys, grid=grid)
 
-    #normalizations       
-    L_reference = float(flux_functions['a'])
+    L_reference = float(global_quantities['a'])
     B_reference = float(2 * np.abs(psi) / (L_reference**2))
+    Rmajor_p = float(global_quantities['R0'])
 
     # Convert jax arrays to numpy arrays
     modB = np.array(data['|B|'])
+    bmag = modB / B_reference
     gradpar_theta_pest = np.array(L_reference * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"]) / data["|B|"])
 
     grad_psi_dot_grad_psi = np.array(data["|grad(psi)|^2"])
@@ -67,9 +70,10 @@ def desc_fieldline(eq, s, alpha, theta1d):
 
     fl = Struct()
     variables = [
-        "s", "rho", "nl", "theta_pest", "theta_desc", "theta_vmec", "zeta", "phi", "edge_toroidal_flux_over_2pi",
+        "s", "rho", "nl", "theta_pest", "theta_desc", "theta_vmec", "zeta", "phi",
+        "edge_toroidal_flux_over_2pi", "Rmajor_p",
         "iota", "shat", "B_reference", "L_reference", "toroidal_flux_sign", "sqrt_s",
-        "modB", "gradpar_theta_pest", "d_pressure_d_s",
+        "modB", "bmag", "gradpar_theta_pest", "d_pressure_d_s",
         "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha",
         "grho", "gds2", "gds22",
         "B_cross_grad_B_dot_grad_psi", "B_cross_grad_B_dot_grad_alpha",
