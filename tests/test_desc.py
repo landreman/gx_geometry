@@ -291,16 +291,41 @@ class Tests(unittest.TestCase):
             add_gx_definitions(fl3, sigma_Bxy)
             add_gx_definitions(fl4, sigma_Bxy)
 
+            if False:
+                plt.figure(figsize=(14, 7.5))
+                nrows = 3
+                ncols = 3
+                jplot = 1
+                def compare_vmec_desc(field, signflip=1):
+                    nonlocal jplot
+                    plt.subplot(nrows, ncols, jplot)
+                    jplot = jplot + 1
+                    plt.plot(fl3.__getattribute__(field), label="desc")
+                    plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
+                    plt.title(field)
+                compare_vmec_desc("z", signflip=-1)
+                compare_vmec_desc("gradpar", signflip=-1)
+                compare_vmec_desc("gds2", signflip=1)
+                compare_vmec_desc("gds21", signflip=1)
+                compare_vmec_desc("gds22", signflip=1)
+                compare_vmec_desc("gbdrift", signflip=1)
+                compare_vmec_desc("cvdrift", signflip=1)
+                compare_vmec_desc("gbdrift0", signflip=1)
+                compare_vmec_desc("cvdrift0", signflip=1)
+                plt.tight_layout()
+                plt.legend(loc=0, fontsize=7)
+                plt.show()
+
             # GX quantities
-            #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
-            #np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=1e-5)
-            #np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), rtol=0.04)
-            #np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), rtol=0.01)
-            #np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=1e-4)
-            #np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.07)
-            #np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.07)
-            #np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
-            #np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
+            np.testing.assert_allclose(fl3.z, -np.flip(fl4.z), atol=1e-13)
+            np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=2e-6)
+            np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), atol=0.43)
+            np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), atol=0.01)
+            np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=0.08)
+            np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.028)
+            np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.028)
+            np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=0.0017)
+            np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=0.0017)
 
 if __name__ == "__main__":
     unittest.main()
