@@ -8,6 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from desc.vmec import VMECIO
 import desc.io
+from desc.equilibrium import Equilibrium
+from desc.geometry import FourierRZToroidalSurface
+from desc.profiles import PowerSeriesProfile
 
 from gx_geometry import desc_fieldline, Vmec, vmec_fieldline, uniform_arclength, add_gx_definitions
 
@@ -17,7 +20,78 @@ logger = logging.getLogger(__name__)
 #logging.basicConfig(level=logging.INFO)
 
 class Tests(unittest.TestCase):
+    def test_tokamak(self):
+        """
+        Compare to analytic formulas for a tokamak from section 5.7 of
+        20230917-01 Signs in GX geometry.lyx
+        """
+        aminor = 2.0
+        aspect = 100.0
+        Rmajor = aspect * aminor
+        surface = FourierRZToroidalSurface(
+            R_lmn=[Rmajor, aminor],
+            modes_R=[[0, 0], [1, 0]],  # modes given as [m, n] for each coefficient
+            Z_lmn=[0.0, -aminor],
+            modes_Z=[[0, 0], [-1, 0]],
+        )
+        # Try all 4 possible directions of the magnetic field:
+        for sign_psi in [1, -1]:
+            for sign_iota in [1, -1]:
+                iota_coeffs = sign_iota * np.array([0.9, -0.65])
+                iota_profile = PowerSeriesProfile(
+                    params=iota_coeffs,
+                    modes=[0, 2]
+                )
+                iota_edge = sum(iota_coeffs)
+                abs_Psi = np.pi * aminor**2 * 5  # So |B| ~ 5 T.
+                eq = Equilibrium(
+                    surface=surface,
+                    iota=iota_profile,
+                    Psi=sign_psi * abs_Psi,
+                    NFP=1,
+                    L=6,
+                    M=6,
+                    N=0,
+                    L_grid=12,
+                    M_grid=12,
+                    N_grid=0,
+                    sym=True,
+                )
+                eq.solve()
+                #eq.save("axisymm.h5")
+                #eq = desc.io.load("axisymm.h5")
+
+                theta = np.linspace(-3 * np.pi, 3 * np.pi, 200)
+                fl = desc_fieldline(eq, s=1, alpha=0, theta1d=theta)
+                B0 = abs_Psi / (np.pi * aminor**2)
+                eps = 1 / aspect
+                safety_factor_q = 1 / iota_edge
+                phi = theta / iota_edge
+                d_iota_d_s = iota_coeffs[1]  # From differentiating c0 + c1 * s
+                d_iota_d_r = d_iota_d_s * 2 / aminor
+                #print('sign of psi in grad psi cross grad theta + iota grad phi cross grad psi:', fl.toroidal_flux_sign)
+
+                # See Matt Landreman's note "20220315-02 Geometry arrays for gyrokinetics in a circular tokamak.docx"
+                # for the analytic results below
+                np.testing.assert_allclose(fl.modB, B0 * (1 - eps * np.cos(theta)), rtol=0.0002)
+                #np.testing.assert_allclose(fl.gradpar_theta_pest, -fl.toroidal_flux_sign * B0 / (safety_factor_q * Rmajor), rtol=0.0006)
+                np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_psi, -(B0 ** 3) * eps * np.sin(theta), rtol=0.03, atol=1e-10)
+                np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_psi, -(B0 ** 2) * eps * np.sin(theta), rtol=0.02, atol=1e-10)
+                np.testing.assert_allclose(fl.grad_psi_dot_grad_psi, B0 * B0 * aminor * aminor, rtol=0.03)
+                np.testing.assert_allclose(fl.grad_alpha_dot_grad_psi, -fl.toroidal_flux_sign * phi * d_iota_d_r * aminor * B0, rtol=0.02)
+                np.testing.assert_allclose(fl.grad_alpha_dot_grad_alpha, 1 / (aminor * aminor) + (phi * phi * d_iota_d_r * d_iota_d_r), rtol=0.04)
+                np.testing.assert_allclose(fl.B_cross_grad_B_dot_grad_alpha,
+                                        fl.toroidal_flux_sign * (B0 * B0 / aminor) * (-np.cos(theta) / Rmajor + phi * d_iota_d_r * eps * np.sin(theta)),
+                                        atol=0.015)
+                np.testing.assert_allclose(fl.B_cross_kappa_dot_grad_alpha,
+                                        fl.toroidal_flux_sign * (B0 / aminor) * (-np.cos(theta) / Rmajor + phi * d_iota_d_r * eps * np.sin(theta)),
+                                        atol=0.0007)
+
     def test_wout_as_desc(self):
+        """
+        Make sure vmec and desc geometry calculations agree for a field line
+        with alpha=0 and an equilibrium with beta=0.
+        """
         filename_base = "wout_LandremanPaul2021_QH_reactorScale_lowres_reference.nc"
         filename = os.path.join(TEST_DIR, filename_base)
         eq = VMECIO.load(filename)

@@ -296,7 +296,7 @@ class VmecFieldlinesTests(unittest.TestCase):
             R = vmec.wout.Rmajor_p
             Aminor = vmec.wout.Aminor_p
             d_iota_d_s = (vmec.wout.iotas[-1] - vmec.wout.iotas[-2]) / vmec.ds
-            d_iota_d_r = d_iota_d_s * Aminor / 2
+            d_iota_d_r = d_iota_d_s * 2 / Aminor
             #print('sign of psi in grad psi cross grad theta + iota grad phi cross grad psi:', fl.toroidal_flux_sign)
 
             # See Matt Landreman's note "20220315-02 Geometry arrays for gyrokinetics in a circular tokamak.docx"
