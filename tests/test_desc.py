@@ -98,101 +98,101 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_alpha, -np.flip(fl2.B_cross_kappa_dot_grad_alpha), atol=0.006)
 
         # Now convert to gx grid and quantities:
-        fl3 = uniform_arclength(fl1)
-        fl4 = uniform_arclength(fl2)
-        sigma_Bxy = -1
-        add_gx_definitions(fl3, sigma_Bxy)
-        add_gx_definitions(fl4, sigma_Bxy)
+        for sigma_Bxy in [-1, 1]:
+            fl3 = uniform_arclength(fl1)
+            fl4 = uniform_arclength(fl2)
+            add_gx_definitions(fl3, sigma_Bxy)
+            add_gx_definitions(fl4, sigma_Bxy)
 
-        if plot_all_quantities:
-            plt.figure(figsize=(14, 7.5))
-            nrows = 3
-            ncols = 4
-            jplot = 1
-            def compare_vmec_desc(field, signflip=1):
-                nonlocal jplot
-                plt.subplot(nrows, ncols, jplot)
-                jplot = jplot + 1
-                #plt.plot(fl3.theta_pest, fl3.__getattribute__(field), label="desc")
-                #plt.plot(fl4.theta_pest, np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
-                plt.plot(fl3.__getattribute__(field), label="desc")
-                plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
-                plt.xlabel("theta_pest")
-                plt.title(field)
-            compare_vmec_desc("modB", signflip=1)
-            compare_vmec_desc("theta_vmec", signflip=-1)
-            compare_vmec_desc("phi", signflip=1)
-            compare_vmec_desc("gradpar_theta_pest", signflip=-1)
-            compare_vmec_desc("grad_psi_dot_grad_psi", signflip=1)
-            compare_vmec_desc("grad_alpha_dot_grad_psi", signflip=1)
-            compare_vmec_desc("grad_alpha_dot_grad_alpha", signflip=1)
-            compare_vmec_desc("B_cross_grad_B_dot_grad_psi", signflip=-1)
-            compare_vmec_desc("B_cross_kappa_dot_grad_psi", signflip=-1)
-            compare_vmec_desc("B_cross_grad_B_dot_grad_alpha", signflip=-1)
-            compare_vmec_desc("B_cross_kappa_dot_grad_alpha", signflip=-1)
-            plt.tight_layout()
-            plt.legend(loc=0, fontsize=7)
-            plt.figtext(0.5, 0.995, "After uniform arclength", ha="center", va="top", fontsize=9)
-            #plt.show()
+            if plot_all_quantities:
+                plt.figure(figsize=(14, 7.5))
+                nrows = 3
+                ncols = 4
+                jplot = 1
+                def compare_vmec_desc(field, signflip=1):
+                    nonlocal jplot
+                    plt.subplot(nrows, ncols, jplot)
+                    jplot = jplot + 1
+                    #plt.plot(fl3.theta_pest, fl3.__getattribute__(field), label="desc")
+                    #plt.plot(fl4.theta_pest, np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
+                    plt.plot(fl3.__getattribute__(field), label="desc")
+                    plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
+                    plt.xlabel("theta_pest")
+                    plt.title(field)
+                compare_vmec_desc("modB", signflip=1)
+                compare_vmec_desc("theta_vmec", signflip=-1)
+                compare_vmec_desc("phi", signflip=1)
+                compare_vmec_desc("gradpar_theta_pest", signflip=-1)
+                compare_vmec_desc("grad_psi_dot_grad_psi", signflip=1)
+                compare_vmec_desc("grad_alpha_dot_grad_psi", signflip=1)
+                compare_vmec_desc("grad_alpha_dot_grad_alpha", signflip=1)
+                compare_vmec_desc("B_cross_grad_B_dot_grad_psi", signflip=-1)
+                compare_vmec_desc("B_cross_kappa_dot_grad_psi", signflip=-1)
+                compare_vmec_desc("B_cross_grad_B_dot_grad_alpha", signflip=-1)
+                compare_vmec_desc("B_cross_kappa_dot_grad_alpha", signflip=-1)
+                plt.tight_layout()
+                plt.legend(loc=0, fontsize=7)
+                plt.figtext(0.5, 0.995, "After uniform arclength", ha="center", va="top", fontsize=9)
+                #plt.show()
 
-        # Scalars:
-        np.testing.assert_allclose(fl3.iota, -fl4.iota)
-        np.testing.assert_allclose(fl3.shat, fl4.shat, rtol=0.0002)
-        np.testing.assert_allclose(fl3.L_reference, fl4.L_reference)
-        np.testing.assert_allclose(fl3.B_reference, fl4.B_reference)
+            # Scalars:
+            np.testing.assert_allclose(fl3.iota, -fl4.iota)
+            np.testing.assert_allclose(fl3.shat, fl4.shat, rtol=0.0002)
+            np.testing.assert_allclose(fl3.L_reference, fl4.L_reference)
+            np.testing.assert_allclose(fl3.B_reference, fl4.B_reference)
 
-        # Quantities that vary along a field line:
-        #show_diffs(fl3.theta_pest, -np.flip(fl4.theta_pest))
-        np.testing.assert_allclose(fl3.theta_pest, -np.flip(fl4.theta_pest), atol=0.0002)
-        np.testing.assert_allclose(fl3.theta_desc, -np.flip(fl4.theta_vmec), rtol=0.006, atol=0.003)
-        np.testing.assert_allclose(fl3.zeta, np.flip(fl4.phi), atol=0.0002)
-        np.testing.assert_allclose(fl3.modB, np.flip(fl4.modB), rtol=0.008)
-        np.testing.assert_allclose(fl3.gradpar_theta_pest, -np.flip(fl4.gradpar_theta_pest), rtol=0.001)
-        np.testing.assert_allclose(fl3.grho, np.flip(fl4.grho), rtol=0.01)
-        np.testing.assert_allclose(fl3.grad_psi_dot_grad_psi, np.flip(fl4.grad_psi_dot_grad_psi), rtol=0.01)
-        np.testing.assert_allclose(fl3.grad_alpha_dot_grad_psi, np.flip(fl4.grad_alpha_dot_grad_psi), atol=0.2)
-        np.testing.assert_allclose(fl3.grad_alpha_dot_grad_alpha, np.flip(fl4.grad_alpha_dot_grad_alpha), atol=0.06)
-        np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_psi, -np.flip(fl4.B_cross_grad_B_dot_grad_psi), rtol=0.1, atol=1.3)
-        np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_psi, -np.flip(fl4.B_cross_kappa_dot_grad_psi), atol=0.04)
-        #show_diffs(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha))
-        np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha), atol=0.82)
-        np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_alpha, -np.flip(fl4.B_cross_kappa_dot_grad_alpha), atol=0.006)
+            # Quantities that vary along a field line:
+            #show_diffs(fl3.theta_pest, -np.flip(fl4.theta_pest))
+            np.testing.assert_allclose(fl3.theta_pest, -np.flip(fl4.theta_pest), atol=0.0002)
+            np.testing.assert_allclose(fl3.theta_desc, -np.flip(fl4.theta_vmec), rtol=0.006, atol=0.003)
+            np.testing.assert_allclose(fl3.zeta, np.flip(fl4.phi), atol=0.0002)
+            np.testing.assert_allclose(fl3.modB, np.flip(fl4.modB), rtol=0.008)
+            np.testing.assert_allclose(fl3.gradpar_theta_pest, -np.flip(fl4.gradpar_theta_pest), rtol=0.001)
+            np.testing.assert_allclose(fl3.grho, np.flip(fl4.grho), rtol=0.01)
+            np.testing.assert_allclose(fl3.grad_psi_dot_grad_psi, np.flip(fl4.grad_psi_dot_grad_psi), rtol=0.01)
+            np.testing.assert_allclose(fl3.grad_alpha_dot_grad_psi, np.flip(fl4.grad_alpha_dot_grad_psi), atol=0.2)
+            np.testing.assert_allclose(fl3.grad_alpha_dot_grad_alpha, np.flip(fl4.grad_alpha_dot_grad_alpha), atol=0.06)
+            np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_psi, -np.flip(fl4.B_cross_grad_B_dot_grad_psi), rtol=0.1, atol=1.3)
+            np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_psi, -np.flip(fl4.B_cross_kappa_dot_grad_psi), atol=0.04)
+            #show_diffs(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha))
+            np.testing.assert_allclose(fl3.B_cross_grad_B_dot_grad_alpha, -np.flip(fl4.B_cross_grad_B_dot_grad_alpha), atol=0.82)
+            np.testing.assert_allclose(fl3.B_cross_kappa_dot_grad_alpha, -np.flip(fl4.B_cross_kappa_dot_grad_alpha), atol=0.006)
 
-        # Now test GX quantities
-        if False:
-            plt.figure(figsize=(14, 7.5))
-            nrows = 3
-            ncols = 3
-            jplot = 1
-            def compare_vmec_desc(field, signflip=1):
-                nonlocal jplot
-                plt.subplot(nrows, ncols, jplot)
-                jplot = jplot + 1
-                plt.plot(fl3.__getattribute__(field), label="desc")
-                plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
-                plt.title(field)
-            compare_vmec_desc("z", signflip=-1)
-            compare_vmec_desc("gradpar", signflip=-1)
-            compare_vmec_desc("gds2", signflip=1)
-            compare_vmec_desc("gds21", signflip=1)
-            compare_vmec_desc("gds22", signflip=1)
-            compare_vmec_desc("gbdrift", signflip=1)
-            compare_vmec_desc("cvdrift", signflip=1)
-            compare_vmec_desc("gbdrift0", signflip=1)
-            compare_vmec_desc("cvdrift0", signflip=1)
-            plt.tight_layout()
-            plt.legend(loc=0, fontsize=7)
-            plt.show()
+            # Now test GX quantities
+            if False:
+                plt.figure(figsize=(14, 7.5))
+                nrows = 3
+                ncols = 3
+                jplot = 1
+                def compare_vmec_desc(field, signflip=1):
+                    nonlocal jplot
+                    plt.subplot(nrows, ncols, jplot)
+                    jplot = jplot + 1
+                    plt.plot(fl3.__getattribute__(field), label="desc")
+                    plt.plot(np.flip(fl4.__getattribute__(field)) * signflip, label="vmec")
+                    plt.title(field)
+                compare_vmec_desc("z", signflip=-1)
+                compare_vmec_desc("gradpar", signflip=-1)
+                compare_vmec_desc("gds2", signflip=1)
+                compare_vmec_desc("gds21", signflip=1)
+                compare_vmec_desc("gds22", signflip=1)
+                compare_vmec_desc("gbdrift", signflip=1)
+                compare_vmec_desc("cvdrift", signflip=1)
+                compare_vmec_desc("gbdrift0", signflip=1)
+                compare_vmec_desc("cvdrift0", signflip=1)
+                plt.tight_layout()
+                plt.legend(loc=0, fontsize=7)
+                plt.show()
 
-        np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
-        np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=1e-5)
-        np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), rtol=0.04)
-        np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), rtol=0.01)
-        np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=1e-4)
-        np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.07)
-        np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.07)
-        np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
-        np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
+            np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+            np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=1e-5)
+            np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), rtol=0.04)
+            np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), rtol=0.01)
+            np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=1e-4)
+            np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.07)
+            np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.07)
+            np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
+            np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
 
     def test_vmec_desc_benchmark_nonzero_alpha(self):     
         """
@@ -283,6 +283,24 @@ class Tests(unittest.TestCase):
         np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_psi, -np.flip(fl2.B_cross_kappa_dot_grad_psi), atol=0.038)
         np.testing.assert_allclose(fl1.B_cross_grad_B_dot_grad_alpha, -np.flip(fl2.B_cross_grad_B_dot_grad_alpha), atol=0.51)
         np.testing.assert_allclose(fl1.B_cross_kappa_dot_grad_alpha, -np.flip(fl2.B_cross_kappa_dot_grad_alpha), atol=0.18)
+
+        # Now convert to gx grid and quantities:
+        for sigma_Bxy in [-1, 1]:
+            fl3 = uniform_arclength(fl1)
+            fl4 = uniform_arclength(fl2)
+            add_gx_definitions(fl3, sigma_Bxy)
+            add_gx_definitions(fl4, sigma_Bxy)
+
+            # GX quantities
+            #np.testing.assert_allclose(fl3.z, -np.flip(fl4.z))
+            #np.testing.assert_allclose(fl3.gradpar, -np.flip(fl4.gradpar), atol=1e-5)
+            #np.testing.assert_allclose(fl3.gds2, np.flip(fl4.gds2), rtol=0.04)
+            #np.testing.assert_allclose(fl3.gds22, np.flip(fl4.gds22), rtol=0.01)
+            #np.testing.assert_allclose(fl3.gds21, np.flip(fl4.gds21), atol=1e-4)
+            #np.testing.assert_allclose(fl3.gbdrift, np.flip(fl4.gbdrift), atol=0.07)
+            #np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.07)
+            #np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=7e-5)
+            #np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=7e-5)
 
 if __name__ == "__main__":
     unittest.main()
