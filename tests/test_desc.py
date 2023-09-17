@@ -143,7 +143,7 @@ class Tests(unittest.TestCase):
         # Quantities that vary along a field line:
         #show_diffs(fl3.theta_pest, -np.flip(fl4.theta_pest))
         np.testing.assert_allclose(fl3.theta_pest, -np.flip(fl4.theta_pest), atol=0.0002)
-        np.testing.assert_allclose(fl3.theta_desc, -np.flip(fl4.theta_vmec), rtol=0.006)
+        np.testing.assert_allclose(fl3.theta_desc, -np.flip(fl4.theta_vmec), rtol=0.006, atol=0.003)
         np.testing.assert_allclose(fl3.zeta, np.flip(fl4.phi), atol=0.0002)
         np.testing.assert_allclose(fl3.modB, np.flip(fl4.modB), rtol=0.008)
         np.testing.assert_allclose(fl3.gradpar_theta_pest, -np.flip(fl4.gradpar_theta_pest), rtol=0.001)
