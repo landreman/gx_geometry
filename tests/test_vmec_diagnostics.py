@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import matplotlib
 
-from gx_geometry import Vmec, vmec_splines, vmec_compute_geometry, vmec_fieldlines, mu_0
+from gx_geometry import Vmec, vmec_splines, vmec_compute_geometry, vmec_fieldline, mu_0
 
 from . import TEST_DIR
 
@@ -74,7 +74,7 @@ class VmecComputeGeometryTests(unittest.TestCase):
 class VmecFieldlinesTests(unittest.TestCase):
     def test_fieldline_grids(self):
         """
-        Check the grids in theta and phi created by vmec_fieldlines().
+        Check the grids in theta and phi created by vmec_fieldline().
         """
         vmec = Vmec(os.path.join(TEST_DIR, 'wout_li383_low_res_reference.nc'))
 
@@ -84,7 +84,7 @@ class VmecFieldlinesTests(unittest.TestCase):
         theta = np.linspace(-np.pi, np.pi, 5)
         for s in ss:
             for alpha in alphas:
-                fl = vmec_fieldlines(vmec, s, alpha, theta1d=theta)
+                fl = vmec_fieldline(vmec, s, alpha, theta1d=theta)
                 np.testing.assert_allclose(fl.theta_pest, theta, atol=1e-15)
                 np.testing.assert_allclose(fl.theta_pest - fl.iota * fl.phi, alpha,
                                            atol=1e-15)
@@ -93,20 +93,20 @@ class VmecFieldlinesTests(unittest.TestCase):
         s = 1
         alpha = -np.pi
         phi = np.linspace(-np.pi, np.pi, 6)
-        fl = vmec_fieldlines(vmec, s, alpha, phi1d=phi)
+        fl = vmec_fieldline(vmec, s, alpha, phi1d=phi)
         np.testing.assert_allclose(fl.phi, phi)
         np.testing.assert_allclose(fl.theta_pest - fl.iota * fl.phi, alpha)
 
         # Try specifying both theta and phi:
         with self.assertRaises(ValueError):
-            fl = vmec_fieldlines(vmec, s, alpha, phi1d=phi, theta1d=theta)
+            fl = vmec_fieldline(vmec, s, alpha, phi1d=phi, theta1d=theta)
         # Try specifying neither theta nor phi:
         with self.assertRaises(ValueError):
-            fl = vmec_fieldlines(vmec, s, alpha)
+            fl = vmec_fieldline(vmec, s, alpha)
 
     def test_consistency(self):
         """
-        Check internal consistency of the results of vmec_fieldlines().
+        Check internal consistency of the results of vmec_fieldline().
         """
         filenames = ['wout_W7-X_without_coil_ripple_beta0p05_d23p4_tm_reference.nc',
                      'wout_LandremanPaul2021_QA_reactorScale_lowres_reference.nc',
@@ -119,9 +119,9 @@ class VmecFieldlinesTests(unittest.TestCase):
                     for alpha in np.linspace(0, 2 * np.pi, 3, endpoint=False):
                         z_grid = np.linspace(-np.pi / 2, np.pi / 2, 7)
                         if j_theta_phi_in == 0:
-                            fl = vmec_fieldlines(vmec, s=s, alpha=alpha, phi1d=z_grid)
+                            fl = vmec_fieldline(vmec, s=s, alpha=alpha, phi1d=z_grid)
                         else:
-                            fl = vmec_fieldlines(vmec, s=s, alpha=alpha, theta1d=z_grid)
+                            fl = vmec_fieldline(vmec, s=s, alpha=alpha, theta1d=z_grid)
 
                         np.testing.assert_allclose(fl.sqrt_g_vmec, fl.sqrt_g_vmec_alt, rtol=1e-4, atol=1e-4)
 
@@ -200,14 +200,14 @@ class VmecFieldlinesTests(unittest.TestCase):
 
     def test_stella_regression(self):
         """
-        Test vmec_fieldlines() by comparing to calculations with the
+        Test vmec_fieldline() by comparing to calculations with the
         geometry interface in the gyrokinetic code stella.
         """
         vmec = Vmec(os.path.join(TEST_DIR, 'wout_LandremanPaul2021_QA_reactorScale_lowres_reference.nc'))
         phi = np.linspace(-np.pi / 2, np.pi / 2, 7)
         for jalpha, alpha in enumerate(np.linspace(0, 2 * np.pi, 3, endpoint=False)):
             s = 0.5
-            fl = vmec_fieldlines(vmec, s=s, alpha=alpha, phi1d=phi)
+            fl = vmec_fieldline(vmec, s=s, alpha=alpha, phi1d=phi)
 
             theta_vmec_reference = np.array([[-0.58175490233450466, -0.47234459364571935, -0.27187109234173445, 0.0000000000000000, 0.27187109234173445, 0.47234459364571935, 0.58175490233450466],
                                             [1.3270163720562491, 1.5362773754015560, 1.7610074217338225, 1.9573739260757410, 2.1337336171762495, 2.3746560860701522, 2.7346254905898566],
@@ -228,7 +228,7 @@ class VmecFieldlinesTests(unittest.TestCase):
 
             s = 1.0
 
-            fl = vmec_fieldlines(vmec, s=s, alpha=alpha, phi1d=phi)
+            fl = vmec_fieldline(vmec, s=s, alpha=alpha, phi1d=phi)
             theta_vmec_reference = np.array([[-0.54696449126914626, -0.48175613245664178, -0.27486119402681097, 0.0000000000000000, 0.27486119402681097, 0.48175613245664178, 0.54696449126914626],
                                             [1.2860600505790374, 1.4762629621552081, 1.7205057726038357, 1.8975933573125818, 2.0499492968214290, 2.3142882369220339, 2.7218102365172787],
                                             [3.5613750706623071, 3.9688970702575519, 4.2332360103581568, 4.3855919498670044, 4.5626795345757500, 4.8069223450243772, 4.9971252566005484]])
@@ -248,7 +248,7 @@ class VmecFieldlinesTests(unittest.TestCase):
         phi_stella = np.fromstring(lines[6], sep=' ')
 
         for j in range(nalpha):
-            fl = vmec_fieldlines(vmec, s=s, alpha=alpha[j], phi1d=phi)
+            fl = vmec_fieldline(vmec, s=s, alpha=alpha[j], phi1d=phi)
 
             # For this comparison, I'll use the definitions of
             # gds21/gbdrift/gbdrift0/cvdrift presently in simsospt, which may differ
@@ -279,7 +279,7 @@ class VmecFieldlinesTests(unittest.TestCase):
 
     def test_axisymm(self):
         """
-        Test that vmec_fieldlines() gives sensible results for axisymmetry.
+        Test that vmec_fieldline() gives sensible results for axisymmetry.
         """
         filenames = [
             "wout_circular_tokamak_aspect_100_phiedgePositive_reference.nc",
@@ -288,7 +288,7 @@ class VmecFieldlinesTests(unittest.TestCase):
         for filename in filenames:
             vmec = Vmec(os.path.join(TEST_DIR, filename))
             theta = np.linspace(-3 * np.pi, 3 * np.pi, 200)
-            fl = vmec_fieldlines(vmec, s=1, alpha=0, theta1d=theta, plot=0)
+            fl = vmec_fieldline(vmec, s=1, alpha=0, theta1d=theta, plot=0)
             B0 = vmec.wout.volavgB
             eps = 1 / vmec.wout.aspect
             safety_factor_q = 1 / vmec.wout.iotaf[-1]
@@ -317,15 +317,15 @@ class VmecFieldlinesTests(unittest.TestCase):
 
     def test_plot(self):
         """
-        Test the plotting function of vmec_fieldlines()
+        Test the plotting function of vmec_fieldline()
         """
         vmec = Vmec(os.path.join(TEST_DIR, 'wout_W7-X_without_coil_ripple_beta0p05_d23p4_tm_reference.nc'))
 
         phi = np.linspace(-np.pi / 5, np.pi / 5, 7)
-        fl = vmec_fieldlines(vmec, s=1, alpha=0, phi1d=phi, plot=True, show=False)
+        fl = vmec_fieldline(vmec, s=1, alpha=0, phi1d=phi, plot=True, show=False)
 
         theta = np.linspace(-np.pi, np.pi, 100)
-        fl = vmec_fieldlines(vmec, s=0.5, alpha=np.pi, theta1d=theta, plot=True, show=False)
+        fl = vmec_fieldline(vmec, s=0.5, alpha=np.pi, theta1d=theta, plot=True, show=False)
 
 
 if __name__ == "__main__":

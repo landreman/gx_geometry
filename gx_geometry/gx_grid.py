@@ -13,7 +13,7 @@ def uniform_arclength(fl1):
     The new parallel coordinate runs from -pi to pi.
 
     Args:
-        fl1: Input field line structure, as computed by ``vmec_fieldlines``
+        fl1: Input field line structure, as computed by ``vmec_fieldline``
     """
     fl1.z = np.zeros_like(fl1.modB)
     fl2 = copy.deepcopy(fl1)

@@ -7,7 +7,7 @@ import logging
 import numpy as np
 
 from gx_geometry.util import Struct
-from gx_geometry import uniform_arclength, Vmec, vmec_fieldlines
+from gx_geometry import uniform_arclength, Vmec, vmec_fieldline
 
 from . import TEST_DIR
 
@@ -39,7 +39,7 @@ class UniformArclengthTests(unittest.TestCase):
         alpha = 0.0
         nl = 201
         theta1d = np.linspace(-2.9, 2.9, nl)
-        fl1 = vmec_fieldlines(vmec, s, alpha, theta1d=theta1d)
+        fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
         fl2 = uniform_arclength(fl1)
 
         # First and last elements of z should be +/- pi:

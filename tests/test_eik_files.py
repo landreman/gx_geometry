@@ -6,7 +6,7 @@ import logging
 
 import numpy as np
 
-from gx_geometry import uniform_arclength, Vmec, vmec_fieldlines, add_gx_definitions, write_eik, read_eik
+from gx_geometry import uniform_arclength, Vmec, vmec_fieldline, add_gx_definitions, write_eik, read_eik
 
 from . import TEST_DIR
 
@@ -21,7 +21,7 @@ class Tests(unittest.TestCase):
         alpha = 0
         nl = 49
         theta1d = np.linspace(-np.pi, np.pi, nl)
-        fl1 = vmec_fieldlines(vmec, s, alpha, theta1d=theta1d)
+        fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
         fl2 = uniform_arclength(fl1)
         kxfac = -1.0
         add_gx_definitions(fl2, kxfac)

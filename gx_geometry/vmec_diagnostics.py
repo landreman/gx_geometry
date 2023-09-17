@@ -18,7 +18,7 @@ from .util import Struct
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['vmec_splines', 'vmec_compute_geometry', 'vmec_fieldlines']
+__all__ = ['vmec_splines', 'vmec_compute_geometry', 'vmec_fieldline']
 
 
 def vmec_splines(vmec):
@@ -501,7 +501,7 @@ def vmec_compute_geometry(vs, s, theta, phi, phi_center=0):
     return results
 
 
-def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=False, show=True):
+def vmec_fieldline(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=False, show=True):
     r"""
     Compute field lines in a vmec configuration, and compute many
     geometric quantities of interest along the field lines. In
@@ -537,11 +537,11 @@ def vmec_fieldlines(vs, s, alpha, theta1d=None, phi1d=None, phi_center=0, plot=F
     Example usage::
 
         import numpy as np
-        from simsopt.mhd import Vmec, vmec_fieldlines
+        from simsopt.mhd import Vmec, vmec_fieldline
 
         v = Vmec('wout_li383_1.4m.nc')
         theta = np.linspace(-np.pi, np.pi, 50)
-        fl = vmec_fieldlines(v, 0.5, 0, theta1d=theta)
+        fl = vmec_fieldline(v, 0.5, 0, theta1d=theta)
         print(fl.B_cross_grad_B_dot_grad_alpha)
 
     Args:
