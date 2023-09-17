@@ -100,9 +100,9 @@ class Tests(unittest.TestCase):
         # Now convert to gx grid and quantities:
         fl3 = uniform_arclength(fl1)
         fl4 = uniform_arclength(fl2)
-        kxfac = -1
-        add_gx_definitions(fl3, kxfac)
-        add_gx_definitions(fl4, kxfac)
+        sigma_Bxy = -1
+        add_gx_definitions(fl3, sigma_Bxy)
+        add_gx_definitions(fl4, sigma_Bxy)
 
         if plot_all_quantities:
             plt.figure(figsize=(14, 7.5))
@@ -217,7 +217,7 @@ class Tests(unittest.TestCase):
         fl1 = desc_fieldline(eq, s, alpha_desc, theta1d=theta1d)
         fl2 = vmec_fieldline(vmec, s, alpha_vmec, theta1d=theta1d)
 
-        plot_all_quantities = True
+        plot_all_quantities = False
         if plot_all_quantities:
             plt.figure(figsize=(14, 7.5))
             nrows = 3

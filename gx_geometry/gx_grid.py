@@ -78,27 +78,29 @@ def uniform_arclength(fl1):
 
     return fl2
 
-def add_gx_definitions(fl, kxfac):
+def add_gx_definitions(fl, sigma_Bxy):
     """
     Add the quantities gds21, gbdrift, gbdrift0, cvdrift, and cvdrift0 to a
     field line structure
 
     Args:
         fl: A structure with data on a field line.
+        sigma_Bxy: (1 / |B|^2) \vec{B} \cdot \nabla x \times \nabla y
     """
-    fl.kxfac = kxfac
+    fl.sigma_Bxy = sigma_Bxy
+    fl.kxfac = sigma_Bxy
 
-    fl.gds21 = kxfac * fl.grad_alpha_dot_grad_psi * fl.shat / fl.B_reference
+    fl.gds21 = sigma_Bxy * fl.grad_alpha_dot_grad_psi * fl.shat / fl.B_reference
 
     fl.gbdrift = (
-        2 * kxfac * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
+        2 * sigma_Bxy * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
         * fl.sqrt_s * fl.B_cross_grad_B_dot_grad_alpha 
         / (fl.modB ** 3)
     )
 
     fl.cvdrift = (
         fl.gbdrift 
-        + 2 * mu_0 * kxfac * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
+        + 2 * mu_0 * sigma_Bxy * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
         * fl.sqrt_s * fl.d_pressure_d_s
         / (fl.edge_toroidal_flux_over_2pi * fl.modB * fl.modB)
     )

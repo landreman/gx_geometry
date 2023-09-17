@@ -21,6 +21,7 @@ def read_eik(filename):
         fl.nl = int(line[2]) + 1
         fl.shat = float(line[5])
         fl.kxfac = float(line[6])
+        fl.sigma_Bxy = fl.kxfac
         fl.iota = 1 / float(line[7])
 
     data = np.loadtxt(filename, skiprows=3, max_rows=fl.nl)

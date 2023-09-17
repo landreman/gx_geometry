@@ -23,8 +23,8 @@ class Tests(unittest.TestCase):
         theta1d = np.linspace(-np.pi, np.pi, nl)
         fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
         fl2 = uniform_arclength(fl1)
-        kxfac = -1.0
-        add_gx_definitions(fl2, kxfac)
+        sigma_Bxy = -1.0
+        add_gx_definitions(fl2, sigma_Bxy)
         eik_filename = "eik.out"
         write_eik(fl2, eik_filename)
 
@@ -32,7 +32,7 @@ class Tests(unittest.TestCase):
         fl3 = read_eik(eik_filename)
 
         variables = [
-            "ns", "nl", "nalpha", "shat", "iota", "kxfac", 
+            "ns", "nl", "nalpha", "shat", "iota", "sigma_Bxy", 
             "z", "bmag", "gds2", "gds21", "gds22", "cvdrift", "gbdrift", "cvdrift0", "gbdrift0", "grho", "gradpar",
         ]
         for variable in variables:

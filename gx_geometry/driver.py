@@ -6,11 +6,11 @@ from .vmec_diagnostics import vmec_fieldline
 
 __all__ = ["create_eik"]
 
-def create_eik(filename, kxfac=1.0, s=0.64, alpha=0, nl=49):
+def create_eik(filename, sigma_Bxy=1.0, s=0.64, alpha=0, nl=49):
     vmec = Vmec(filename)
     theta1d = np.linspace(-np.pi, np.pi, nl)
     fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
     fl2 = uniform_arclength(fl1)
-    add_gx_definitions(fl2, kxfac)
+    add_gx_definitions(fl2, sigma_Bxy)
     eik_filename = "eik.out"
     write_eik(fl2, eik_filename)
