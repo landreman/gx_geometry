@@ -1,6 +1,9 @@
 import numpy as np
-from desc.grid import Grid, LinearGrid
-from desc.compute.utils import cross, dot
+try:
+    from desc.grid import Grid, LinearGrid
+    from desc.compute.utils import cross, dot
+except ImportError:
+    pass
 from .util import Struct
 
 __all__ = ["desc_fieldline"]

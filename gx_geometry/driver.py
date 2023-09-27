@@ -1,5 +1,9 @@
 import numpy as np
-import desc.io
+try:
+    import desc.io
+except ImportError:
+    pass
+
 from .desc import desc_fieldline
 from .gx_grid import uniform_arclength, add_gx_definitions
 from .eik_files import write_eik
