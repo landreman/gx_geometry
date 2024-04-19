@@ -19,10 +19,10 @@ def desc_fieldline(eq, s, alpha, theta1d):
     linear_grid = LinearGrid(rho=rho, M=34, N=35, NFP=eq.NFP)
     flux_functions = eq.compute(flux_function_keys, grid=linear_grid)
 
-    iota = float(linear_grid.compress(flux_functions["iota"]))
-    iota_r = float(linear_grid.compress(flux_functions["iota_r"]))
+    iota = float(linear_grid.compress(flux_functions["iota"])[0])
+    iota_r = float(linear_grid.compress(flux_functions["iota_r"])[0])
     shat = -(rho / iota) * iota_r
-    d_pressure_d_s = float(linear_grid.compress(flux_functions["p_r"]) / (2 * rho))
+    d_pressure_d_s = float(linear_grid.compress(flux_functions["p_r"])[0] / (2 * rho))
 
     nl = len(theta1d)
     theta = theta1d
@@ -35,6 +35,12 @@ def desc_fieldline(eq, s, alpha, theta1d):
     c = np.vstack([rhoa, theta, zeta]).T
     coords = eq.compute_theta_coords(c, tol=1e-10, maxiter=50)
     theta_desc = np.array(coords[:, 1])
+
+    # desc's compute_theta_coords forces the resulting theta to lie in [0, 2pi].
+    # Undo this by assuming that |theta - theta_desc| is < pi.
+    multiples_of_2pi_to_shift = np.round((theta - theta_desc) / (2 * np.pi))
+    theta_desc += 2 * np.pi * multiples_of_2pi_to_shift
+
     theta_vmec = theta_desc
     # In next line, if we don't set sort=False, desc flips the direction of the
     # grid when iota < 0!
