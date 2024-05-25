@@ -99,9 +99,23 @@ def read_eik_netcdf(filename):
     return fl
 
 
-def write_eik(fl, filename):
+def write_eik(fl, filename, netcdf=False):
     """
-    Write an eik file that GX can read.
+    Write an eik file that GX can read, in either plain-text or NetCDF format.
+
+    Args:
+        fl: A structure with data on a field line.
+        filename: Name of the eik file to write.
+    """
+    if netcdf:
+        write_eik_netcdf(fl, filename)
+    else:
+        write_eik_text(fl, filename)
+
+
+def write_eik_text(fl, filename):
+    """
+    Write an eik file that GX can read, in plain-text format.
 
     Args:
         fl: A structure with data on a field line.
@@ -138,3 +152,74 @@ def write_eik(fl, filename):
         f.write(f"cvdrift0         gbdrift0        tgrid\n")
         for j in range(fl.nl):
             f.write(f"{fl.cvdrift0[j]:23} {fl.gbdrift0[j]:23} {fl.z[j]:23}\n")
+
+
+def write_eik_netcdf(fl, filename):
+    """
+    Write an eik file that GX can read, in NetCDF format.
+
+    Args:
+        fl: A structure with data on a field line.
+        filename: Name of the eik file to write.
+    """
+    assert fl.nl % 2 == 1
+    file = Dataset(filename, mode="w", format="NETCDF3_64BIT_OFFSET")
+    file.createDimension("z", fl.nl)
+
+    # Scalars:
+
+    var = file.createVariable("sigma_Bxy", np.float64)
+    var[:] = fl.sigma_Bxy
+
+    var = file.createVariable("drhodpsi", np.float64)
+    var[:] = 1.0
+
+    var = file.createVariable("kxfac", np.float64)
+    var[:] = fl.kxfac
+
+    var = file.createVariable("Rmaj", np.float64)
+    var[:] = fl.Rmajor_p
+
+    var = file.createVariable("q", np.float64)
+    var[:] = 1 / fl.iota
+
+    var = file.createVariable("shat", np.float64)
+    var[:] = fl.shat
+
+    var = file.createVariable("scale", np.float64)
+    var[:] = 1.0
+
+    var = file.createVariable("alpha", np.float64)
+    var[:] = fl.alpha
+
+    var = file.createVariable("zeta_center", np.float64)
+    var[:] = fl.phi_center
+
+    var = file.createVariable("nfp", np.int32)
+    var[:] = fl.nfp
+
+    # 1D arrays
+
+    var = file.createVariable("theta", np.float64, ("z",))
+    var[:] = fl.z
+
+    vars = [
+        "bmag",
+        "gradpar",
+        "grho",
+        "gds2",
+        "gds21",
+        "gds22",
+        "gbdrift",
+        "gbdrift0",
+        "cvdrift",
+        "cvdrift0",
+    ]
+    for varname in vars:
+        var = file.createVariable(varname, np.float64, ("z",))
+        var[:] = fl.__getattribute__(varname)
+
+    vars = ["jacob", "Rplot", "Zplot"]
+    for varname in vars:
+        var = file.createVariable(varname, np.float64, ("z",))
+        var[:] = 0.0

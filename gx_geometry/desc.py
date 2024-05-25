@@ -1,4 +1,5 @@
 import numpy as np
+
 try:
     from desc.grid import Grid, LinearGrid
     from desc.compute.utils import cross, dot
@@ -8,7 +9,10 @@ from .util import Struct
 
 __all__ = ["desc_fieldline"]
 
+
 def desc_fieldline(eq, s, alpha, theta1d):
+    phi_center = 0.0  # Not implemented yet
+    nfp = eq.NFP
     psi = float(eq.Psi / (2 * np.pi))
     toroidal_flux_sign = np.sign(psi)
     rho = np.sqrt(s)
@@ -50,47 +54,102 @@ def desc_fieldline(eq, s, alpha, theta1d):
     grid = Grid(coords, sort=False)
 
     field_line_keys = [
-        "|B|", "|grad(psi)|^2", "grad(|B|)", "grad(alpha)", "grad(psi)",
-        "B", "grad(|B|)", "kappa", "B^theta", "B^zeta", "lambda_t", "lambda_z",
+        "|B|",
+        "|grad(psi)|^2",
+        "grad(|B|)",
+        "grad(alpha)",
+        "grad(psi)",
+        "B",
+        "grad(|B|)",
+        "kappa",
+        "B^theta",
+        "B^zeta",
+        "lambda_t",
+        "lambda_z",
     ]
     data = eq.compute(field_line_keys, grid=grid)
 
-    L_reference = float(global_quantities['a'])
+    L_reference = float(global_quantities["a"])
     B_reference = float(2 * np.abs(psi) / (L_reference**2))
-    Rmajor_p = float(global_quantities['R0'])
+    Rmajor_p = float(global_quantities["R0"])
 
     # Convert jax arrays to numpy arrays
-    modB = np.array(data['|B|'])
+    modB = np.array(data["|B|"])
     bmag = modB / B_reference
-    gradpar_theta_pest = np.array(L_reference * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"]) / data["|B|"])
+    gradpar_theta_pest = np.array(
+        L_reference
+        * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"])
+        / data["|B|"]
+    )
 
     grad_psi_dot_grad_psi = np.array(data["|grad(psi)|^2"])
     grad_alpha_dot_grad_psi = np.array(dot(data["grad(alpha)"], data["grad(psi)"]))
     grad_alpha_dot_grad_alpha = np.array(dot(data["grad(alpha)"], data["grad(alpha)"]))
 
-    grho = np.sqrt(grad_psi_dot_grad_psi / (L_reference * L_reference * B_reference * B_reference * s))
+    grho = np.sqrt(
+        grad_psi_dot_grad_psi
+        / (L_reference * L_reference * B_reference * B_reference * s)
+    )
     gds2 = grad_alpha_dot_grad_alpha * L_reference * L_reference * s
-    gds22 = grad_psi_dot_grad_psi * shat * shat / (L_reference * L_reference * B_reference * B_reference * s)
+    gds22 = (
+        grad_psi_dot_grad_psi
+        * shat
+        * shat
+        / (L_reference * L_reference * B_reference * B_reference * s)
+    )
 
-    B_cross_grad_B_dot_grad_psi = np.array(dot(cross(data["B"], data["grad(|B|)"]), data["grad(psi)"]))
-    B_cross_grad_B_dot_grad_alpha = np.array(dot(cross(data["B"], data["grad(|B|)"]), data["grad(alpha)"]))
-    B_cross_kappa_dot_grad_psi = np.array(dot(cross(data["B"], data["kappa"]), data["grad(psi)"]))
-    B_cross_kappa_dot_grad_alpha = np.array(dot(cross(data["B"], data["kappa"]), data["grad(alpha)"]))
+    B_cross_grad_B_dot_grad_psi = np.array(
+        dot(cross(data["B"], data["grad(|B|)"]), data["grad(psi)"])
+    )
+    B_cross_grad_B_dot_grad_alpha = np.array(
+        dot(cross(data["B"], data["grad(|B|)"]), data["grad(alpha)"])
+    )
+    B_cross_kappa_dot_grad_psi = np.array(
+        dot(cross(data["B"], data["kappa"]), data["grad(psi)"])
+    )
+    B_cross_kappa_dot_grad_alpha = np.array(
+        dot(cross(data["B"], data["kappa"]), data["grad(alpha)"])
+    )
 
     fl = Struct()
     variables = [
-        "s", "rho", "nl", "theta_pest", "theta_desc", "theta_vmec", "zeta", "phi",
-        "edge_toroidal_flux_over_2pi", "Rmajor_p",
-        "iota", "shat", "B_reference", "L_reference", "toroidal_flux_sign", "sqrt_s",
-        "modB", "bmag", "gradpar_theta_pest", "d_pressure_d_s",
-        "grad_psi_dot_grad_psi", "grad_alpha_dot_grad_psi", "grad_alpha_dot_grad_alpha",
-        "grho", "gds2", "gds22",
-        "B_cross_grad_B_dot_grad_psi", "B_cross_grad_B_dot_grad_alpha",
-        "B_cross_kappa_dot_grad_psi", "B_cross_kappa_dot_grad_alpha",
+        "s",
+        "rho",
+        "alpha",
+        "nl",
+        "theta_pest",
+        "theta_desc",
+        "theta_vmec",
+        "zeta",
+        "phi",
+        "phi_center",
+        "edge_toroidal_flux_over_2pi",
+        "Rmajor_p",
+        "iota",
+        "shat",
+        "B_reference",
+        "L_reference",
+        "toroidal_flux_sign",
+        "sqrt_s",
+        "modB",
+        "bmag",
+        "gradpar_theta_pest",
+        "d_pressure_d_s",
+        "grad_psi_dot_grad_psi",
+        "grad_alpha_dot_grad_psi",
+        "grad_alpha_dot_grad_alpha",
+        "grho",
+        "gds2",
+        "gds22",
+        "B_cross_grad_B_dot_grad_psi",
+        "B_cross_grad_B_dot_grad_alpha",
+        "B_cross_kappa_dot_grad_psi",
+        "B_cross_kappa_dot_grad_alpha",
+        "nfp",
     ]
     for v in variables:
         val = eval(v)
-        #print("  ", v, "has type", type(val))
+        # print("  ", v, "has type", type(val))
         if not isinstance(val, (int, float, np.ndarray)):
             raise RuntimeError(f"Variable {v} may still have a jax type: {type(val)}")
         fl.__setattr__(v, val)

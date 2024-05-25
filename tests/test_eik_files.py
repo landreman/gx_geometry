@@ -5,11 +5,13 @@ import os
 import logging
 
 import numpy as np
+import desc.io
 
 from gx_geometry import (
     uniform_arclength,
     Vmec,
     vmec_fieldline,
+    desc_fieldline,
     add_gx_definitions,
     write_eik,
     read_eik,
@@ -69,6 +71,86 @@ class Tests(unittest.TestCase):
         full_filename = os.path.join(TEST_DIR, filename)
         fl1 = read_eik(full_filename)
         fl2 = read_eik_netcdf(full_filename)
+
+    def test_write_read_eik_netcdf_vmec(self):
+        filename = "wout_w7x_from_gx_repository.nc"
+        vmec = Vmec(os.path.join(TEST_DIR, filename))
+        s = 0.64
+        alpha = 0
+        nl = 49
+        theta1d = np.linspace(-np.pi, np.pi, nl)
+        fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
+        fl2 = uniform_arclength(fl1)
+        sigma_Bxy = -1.0
+        add_gx_definitions(fl2, sigma_Bxy)
+        eik_filename = "eik.nc"
+        write_eik(fl2, eik_filename, netcdf=True)
+
+        # Now read in the eik file we wrote:
+        fl3 = read_eik(eik_filename)
+
+        variables = [
+            "ns",
+            "nl",
+            "nalpha",
+            "shat",
+            "iota",
+            "sigma_Bxy",
+            "z",
+            "bmag",
+            "gds2",
+            "gds21",
+            "gds22",
+            "cvdrift",
+            "gbdrift",
+            "cvdrift0",
+            "gbdrift0",
+            "grho",
+            "gradpar",
+        ]
+        for variable in variables:
+            np.testing.assert_allclose(
+                fl2.__getattribute__(variable), fl3.__getattribute__(variable)
+            )
+
+    def test_write_read_eik_netcdf_desc(self):
+        filename = "w7x_from_gx_repository_LMN8.h5"
+        eq = desc.io.load(os.path.join(TEST_DIR, filename))
+        s = 0.64
+        alpha = 0
+        nl = 49
+        theta1d = np.linspace(-np.pi, np.pi, nl)
+        fl1 = desc_fieldline(eq, s, alpha, theta1d=theta1d)
+        fl2 = uniform_arclength(fl1)
+        sigma_Bxy = -1.0
+        add_gx_definitions(fl2, sigma_Bxy)
+        eik_filename = "eik.nc"
+        write_eik(fl2, eik_filename, netcdf=True)
+
+        # Now read in the eik file we wrote:
+        fl3 = read_eik(eik_filename)
+
+        variables = [
+            "nl",
+            "shat",
+            "iota",
+            "sigma_Bxy",
+            "z",
+            "bmag",
+            "gds2",
+            "gds21",
+            "gds22",
+            "cvdrift",
+            "gbdrift",
+            "cvdrift0",
+            "gbdrift0",
+            "grho",
+            "gradpar",
+        ]
+        for variable in variables:
+            np.testing.assert_allclose(
+                fl2.__getattribute__(variable), fl3.__getattribute__(variable)
+            )
 
 
 if __name__ == "__main__":
