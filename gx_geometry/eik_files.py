@@ -1,14 +1,32 @@
 import numpy as np
+from netCDF4 import Dataset
 from .util import Struct
 
-__all__ = ["read_eik", "write_eik"]
+__all__ = ["read_eik", "read_eik_text", "read_eik_netcdf", "write_eik"]
+
 
 def read_eik(filename):
-    """Read an eik file and store the results in a data structure.
-    
+    """Read an eik file in either plain-text or netcdf format and store the results in a data structure.
+
     Args:
         filename: Name of the file to read
-        
+
+    Returns:
+        Data structure with all the geometric quantities as attributes.
+    """
+
+    if filename.endswith(".nc"):
+        return read_eik_netcdf(filename)
+    else:
+        return read_eik_text(filename)
+
+
+def read_eik_text(filename):
+    """Read an eik file in plain-text format and store the results in a data structure.
+
+    Args:
+        filename: Name of the file to read
+
     Returns:
         Data structure with all the geometric quantities as attributes.
     """
@@ -46,10 +64,45 @@ def read_eik(filename):
     return fl
 
 
+def read_eik_netcdf(filename):
+    """Read an eik file in netcdf format and store the results in a data structure.
+
+    Args:
+        filename: Name of the file to read
+
+    Returns:
+        Data structure with all the geometric quantities as attributes.
+    """
+    fl = Struct()
+    fl.nalpha = 1
+    fl.ns = 1
+
+    f = Dataset(filename, mode="r")
+    fl.shat = f.variables["shat"][()]
+    fl.kxfac = f.variables["kxfac"][()]
+    fl.sigma_Bxy = fl.kxfac
+    fl.iota = 1 / f.variables["q"][()]
+    fl.gbdrift = f.variables["gbdrift"][()]
+    fl.gradpar = f.variables["gradpar"][()]
+    fl.grho = f.variables["grho"][()]
+    fl.z = f.variables["theta"][()]
+    fl.cvdrift = f.variables["cvdrift"][()]
+    fl.gds2 = f.variables["gds2"][()]
+    fl.bmag = f.variables["bmag"][()]
+    fl.gds21 = f.variables["gds21"][()]
+    fl.gds22 = f.variables["gds22"][()]
+    fl.cvdrift0 = f.variables["cvdrift0"][()]
+    fl.gbdrift0 = f.variables["gbdrift0"][()]
+    fl.nl = len(fl.bmag)
+    f.close()
+
+    return fl
+
+
 def write_eik(fl, filename):
     """
     Write an eik file that GX can read.
-    
+
     Args:
         fl: A structure with data on a field line.
         filename: Name of the eik file to write.
@@ -66,13 +119,19 @@ def write_eik(fl, filename):
     scale = 1.0
     with open(filename, "w") as f:
         f.write(f"ntgrid nperiod ntheta drhodpsi rmaj shat kxfac q scale\n")
-        f.write(f"{ntgrid} {nperiod} {ntheta} {drhodpsi} {rmaj} {shat} {kxfac} {q} {scale}\n")
+        f.write(
+            f"{ntgrid} {nperiod} {ntheta} {drhodpsi} {rmaj} {shat} {kxfac} {q} {scale}\n"
+        )
         f.write(f"gbdrift  gradpar         grho    tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.gbdrift[j]:23} {fl.gradpar[j]:23} {fl.grho[j]:23} {fl.z[j]:23}\n")
+            f.write(
+                f"{fl.gbdrift[j]:23} {fl.gradpar[j]:23} {fl.grho[j]:23} {fl.z[j]:23}\n"
+            )
         f.write(f"cvdrift  gds2    bmag    tgrid\n")
         for j in range(fl.nl):
-            f.write(f"{fl.cvdrift[j]:23} {fl.gds2[j]:23} {fl.bmag[j]:23} {fl.z[j]:23}\n")
+            f.write(
+                f"{fl.cvdrift[j]:23} {fl.gds2[j]:23} {fl.bmag[j]:23} {fl.z[j]:23}\n"
+            )
         f.write(f"gds21    gds22   tgrid\n")
         for j in range(fl.nl):
             f.write(f"{fl.gds21[j]:23} {fl.gds22[j]:23} {fl.z[j]:23}\n")
