@@ -94,12 +94,16 @@ def read_eik_netcdf(filename):
     fl.cvdrift0 = f.variables["cvdrift0"][()]
     fl.gbdrift0 = f.variables["gbdrift0"][()]
     fl.nl = len(fl.bmag)
+    fl.Rmajor_p = f.variables["Rmaj"][()]
+    fl.alpha = f.variables["alpha"][()]
+    fl.phi_center = f.variables["zeta_center"][()]
+    fl.nfp = f.variables["nfp"][()]
     f.close()
 
     return fl
 
 
-def write_eik(fl, filename, netcdf=False):
+def write_eik(fl, filename):
     """
     Write an eik file that GX can read, in either plain-text or NetCDF format.
 
@@ -107,7 +111,7 @@ def write_eik(fl, filename, netcdf=False):
         fl: A structure with data on a field line.
         filename: Name of the eik file to write.
     """
-    if netcdf:
+    if filename.endswith(".nc"):
         write_eik_netcdf(fl, filename)
     else:
         write_eik_text(fl, filename)

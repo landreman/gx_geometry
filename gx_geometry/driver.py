@@ -43,8 +43,7 @@ def create_eik_from_vmec(
     fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
-    netcdf = eik_filename.endswith(".nc")
-    write_eik(fl2, eik_filename, netcdf=netcdf)
+    write_eik(fl2, eik_filename)
 
     return fl2
 
@@ -78,7 +77,6 @@ def create_eik_from_desc(
     fl1 = desc_fieldline(eq, s, alpha, theta1d=theta1d)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
-    netcdf = eik_filename.endswith(".nc")
-    write_eik(fl2, eik_filename, netcdf=netcdf)
+    write_eik(fl2, eik_filename)
 
     return fl2

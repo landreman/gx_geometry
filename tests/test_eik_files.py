@@ -70,7 +70,11 @@ class Tests(unittest.TestCase):
         filename = "w7x_adiabatic_electrons_generated_by_GX.eik.nc"
         full_filename = os.path.join(TEST_DIR, filename)
         fl1 = read_eik(full_filename)
+        write_eik(fl1, "eik.out")
+        write_eik(fl1, "eik.nc")
         fl2 = read_eik_netcdf(full_filename)
+        write_eik(fl2, "eik.out")
+        write_eik(fl2, "eik.nc")
 
     def test_write_read_eik_netcdf_vmec(self):
         filename = "wout_w7x_from_gx_repository.nc"
@@ -84,7 +88,7 @@ class Tests(unittest.TestCase):
         sigma_Bxy = -1.0
         add_gx_definitions(fl2, sigma_Bxy)
         eik_filename = "eik.nc"
-        write_eik(fl2, eik_filename, netcdf=True)
+        write_eik(fl2, eik_filename)
 
         # Now read in the eik file we wrote:
         fl3 = read_eik(eik_filename)
@@ -125,7 +129,7 @@ class Tests(unittest.TestCase):
         sigma_Bxy = -1.0
         add_gx_definitions(fl2, sigma_Bxy)
         eik_filename = "eik.nc"
-        write_eik(fl2, eik_filename, netcdf=True)
+        write_eik(fl2, eik_filename)
 
         # Now read in the eik file we wrote:
         fl3 = read_eik(eik_filename)
