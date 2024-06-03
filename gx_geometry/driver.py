@@ -18,7 +18,8 @@ __all__ = ["create_eik_from_vmec", "create_eik_from_desc"]
 def create_eik_from_vmec(
     filename,
     s=0.64,
-    alpha=0,
+    theta0=0,
+    zeta0=0,
     nz=49,
     poloidal_turns=1,
     sigma_Bxy=-1.0,
@@ -29,7 +30,7 @@ def create_eik_from_vmec(
     Args:
         filename: Name of a vmec wout file to read.
         s: Normalized toroidal flux for the field line.
-        alpha: Field line label, theta_pest - iota * zeta.
+        theta0, zeta0: Center of the field line.
         nz: Number of grid points parallel to the field.
         poloidal_turns: Number of poloidal turns to cover in the parallel direction.
         sigma_Bxy: (1 / |B|^2) \vec{B} \cdot \nabla x \times \nabla y, usually -1.
@@ -39,8 +40,11 @@ def create_eik_from_vmec(
         fl: A Struct containing the field line data.
     """
     vmec = Vmec(filename)
-    theta1d = np.linspace(-np.pi * poloidal_turns, np.pi * poloidal_turns, nz)
-    fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
+    theta1d = np.linspace(
+        theta0 - np.pi * poloidal_turns, theta0 + np.pi * poloidal_turns, nz
+    )
+    alpha = theta0
+    fl1 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d, phi_center=zeta0)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
     write_eik(fl2, eik_filename)
@@ -49,14 +53,21 @@ def create_eik_from_vmec(
 
 
 def create_eik_from_desc(
-    eq, s=0.64, alpha=0, nz=49, poloidal_turns=1, sigma_Bxy=-1.0, eik_filename="eik.out"
+    eq,
+    s=0.64,
+    theta0=0,
+    zeta0=0,
+    nz=49,
+    poloidal_turns=1,
+    sigma_Bxy=-1.0,
+    eik_filename="eik.out",
 ):
     r"""Driver to create an eik file that GX can read from a desc .h5 output file.
 
     Args:
         eq: DESC Equilibrium object, or name of a desc .h5 output file to read.
         s: Normalized toroidal flux for the field line.
-        alpha: Field line label, theta_pest - iota * zeta.
+        theta0, zeta0: Center of the field line.
         nz: Number of grid points parallel to the field.
         poloidal_turns: Number of poloidal turns to cover in the parallel direction.
         sigma_Bxy: (1 / |B|^2) \vec{B} \cdot \nabla x \times \nabla y, usually -1.
@@ -73,8 +84,11 @@ def create_eik_from_desc(
         except:
             pass
 
-    theta1d = np.linspace(-np.pi * poloidal_turns, np.pi * poloidal_turns, nz)
-    fl1 = desc_fieldline(eq, s, alpha, theta1d=theta1d)
+    theta1d = np.linspace(
+        theta0 - np.pi * poloidal_turns, theta0 + np.pi * poloidal_turns, nz
+    )
+    alpha = theta0
+    fl1 = desc_fieldline(eq, s, alpha, theta1d=theta1d, zeta0=zeta0)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
     write_eik(fl2, eik_filename)

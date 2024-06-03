@@ -10,8 +10,8 @@ from .util import Struct
 __all__ = ["desc_fieldline"]
 
 
-def desc_fieldline(eq, s, alpha, theta1d):
-    phi_center = 0.0  # Not implemented yet
+def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
+    phi_center = zeta0
     nfp = eq.NFP
     psi = float(eq.Psi / (2 * np.pi))
     toroidal_flux_sign = np.sign(psi)
@@ -34,9 +34,9 @@ def desc_fieldline(eq, s, alpha, theta1d):
     nl = len(theta1d)
     theta = theta1d
     theta_pest = theta
-    # alpha = theta - iota * zeta
-    # zeta = (theta - alpha) / iota
-    zeta = (theta - alpha) / iota
+    # alpha = theta - iota * (zeta - zeta0)
+    # zeta = zeta0 + (theta - alpha) / iota
+    zeta = zeta0 + (theta - alpha) / iota
     phi = zeta
     rhoa = rho * np.ones(nl)
     c = np.vstack([rhoa, theta, zeta]).T
@@ -66,12 +66,19 @@ def desc_fieldline(eq, s, alpha, theta1d):
         "B^zeta",
         "lambda_t",
         "lambda_z",
+        "iota_r",
+        "e^rho",
     ]
     data = eq.compute(field_line_keys, grid=grid)
 
     L_reference = float(global_quantities["a"])
     B_reference = float(2 * np.abs(psi) / (L_reference**2))
     Rmajor_p = float(global_quantities["R0"])
+
+    # Desc's grad alpha does not include zeta0, so shift it appropriately
+    grad_alpha_shifted = (
+        data["grad(alpha)"] + zeta0 * data["iota_r"][:, None] * data["e^rho"]
+    )
 
     # Convert jax arrays to numpy arrays
     modB = np.array(data["|B|"])
@@ -83,8 +90,8 @@ def desc_fieldline(eq, s, alpha, theta1d):
     )
 
     grad_psi_dot_grad_psi = np.array(data["|grad(psi)|^2"])
-    grad_alpha_dot_grad_psi = np.array(dot(data["grad(alpha)"], data["grad(psi)"]))
-    grad_alpha_dot_grad_alpha = np.array(dot(data["grad(alpha)"], data["grad(alpha)"]))
+    grad_alpha_dot_grad_psi = np.array(dot(grad_alpha_shifted, data["grad(psi)"]))
+    grad_alpha_dot_grad_alpha = np.array(dot(grad_alpha_shifted, grad_alpha_shifted))
 
     grho = np.sqrt(
         grad_psi_dot_grad_psi
@@ -102,13 +109,13 @@ def desc_fieldline(eq, s, alpha, theta1d):
         dot(cross(data["B"], data["grad(|B|)"]), data["grad(psi)"])
     )
     B_cross_grad_B_dot_grad_alpha = np.array(
-        dot(cross(data["B"], data["grad(|B|)"]), data["grad(alpha)"])
+        dot(cross(data["B"], data["grad(|B|)"]), grad_alpha_shifted)
     )
     B_cross_kappa_dot_grad_psi = np.array(
         dot(cross(data["B"], data["kappa"]), data["grad(psi)"])
     )
     B_cross_kappa_dot_grad_alpha = np.array(
-        dot(cross(data["B"], data["kappa"]), data["grad(alpha)"])
+        dot(cross(data["B"], data["kappa"]), grad_alpha_shifted)
     )
 
     fl = Struct()
