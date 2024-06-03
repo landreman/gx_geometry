@@ -179,6 +179,8 @@ def desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nl):
     )
     alpha = theta0
     fl = desc_fieldline(eq, s, alpha, theta1d=theta1d, zeta0=zeta0)
+    fl.theta0 = theta0
+    fl.poloidal_turns = poloidal_turns
     return fl
 
 

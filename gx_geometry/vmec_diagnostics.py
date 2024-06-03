@@ -940,4 +940,6 @@ def vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nl):
     )
     alpha = theta0
     fl = vmec_fieldline(vmec, s, alpha, theta1d=theta1d, phi_center=zeta0)
+    fl.theta0 = theta0
+    fl.poloidal_turns = poloidal_turns
     return fl
