@@ -19,7 +19,12 @@ from .util import Struct
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["vmec_splines", "vmec_compute_geometry", "vmec_fieldline"]
+__all__ = [
+    "vmec_splines",
+    "vmec_compute_geometry",
+    "vmec_fieldline",
+    "vmec_fieldline_from_center",
+]
 
 
 def vmec_splines(vmec):
@@ -866,6 +871,12 @@ def vmec_fieldline(
     # Now that we have theta_vmec, compute all the geometric quantities:
     results = vmec_compute_geometry(vs, s, theta_vmec, phi, phi_center)
 
+    # Taking element [0] in the next line may not make sense if we have multiple values of s
+    # and/or alpha:
+    results.length = np.abs(
+        np.trapz(1 / results.gradpar_theta_pest, results.theta_pest)
+    )[0]
+
     # Add a few more quantities to the results:
     variables = ["nalpha", "nl", "alpha", "theta1d", "phi1d", "phi"]
     for v in variables:
@@ -918,3 +929,15 @@ def vmec_fieldline(
             plt.show()
 
     return results
+
+
+def vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nl):
+    """Create a field line similar to vmec_fieldline, but taking the arguments
+    in a different form.
+    """
+    theta1d = np.linspace(
+        theta0 - np.pi * poloidal_turns, theta0 + np.pi * poloidal_turns, nl
+    )
+    alpha = theta0
+    fl = vmec_fieldline(vmec, s, alpha, theta1d=theta1d, phi_center=zeta0)
+    return fl

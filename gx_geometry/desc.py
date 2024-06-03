@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import root_scalar
 
 try:
     from desc.grid import Grid, LinearGrid
@@ -7,7 +8,11 @@ except ImportError:
     pass
 from .util import Struct
 
-__all__ = ["desc_fieldline"]
+__all__ = [
+    "desc_fieldline",
+    "desc_fieldline_from_center",
+    "desc_fieldline_specified_length",
+]
 
 
 def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
@@ -88,6 +93,7 @@ def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
         * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"])
         / data["|B|"]
     )
+    length = float(np.abs(np.trapz(1 / gradpar_theta_pest, theta_pest)))
 
     grad_psi_dot_grad_psi = np.array(data["|grad(psi)|^2"])
     grad_alpha_dot_grad_psi = np.array(dot(grad_alpha_shifted, data["grad(psi)"]))
@@ -141,6 +147,7 @@ def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
         "modB",
         "bmag",
         "gradpar_theta_pest",
+        "length",
         "d_pressure_d_s",
         "grad_psi_dot_grad_psi",
         "grad_alpha_dot_grad_psi",
@@ -160,4 +167,40 @@ def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
         if not isinstance(val, (int, float, np.ndarray)):
             raise RuntimeError(f"Variable {v} may still have a jax type: {type(val)}")
         fl.__setattr__(v, val)
+    return fl
+
+
+def desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nl):
+    """Create a field line similar to desc_fieldline, but taking the arguments
+    in a different form.
+    """
+    theta1d = np.linspace(
+        theta0 - np.pi * poloidal_turns, theta0 + np.pi * poloidal_turns, nl
+    )
+    alpha = theta0
+    fl = desc_fieldline(eq, s, alpha, theta1d=theta1d, zeta0=zeta0)
+    return fl
+
+
+def _length_residual(
+    poloidal_turns, target_length_over_L_ref, eq, s, theta0, zeta0, nl, verbose
+):
+    fl = desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nl)
+    if verbose:
+        print("poloidal_turns:", poloidal_turns, "length:", fl.length)
+    return fl.length - target_length_over_L_ref
+
+
+def desc_fieldline_specified_length(eq, s, theta0, zeta0, nl, length, verbose=True):
+    """Solve for the number of poloidal turns to match a specified length.
+
+    The length argument is (physical length) / L_reference.
+    """
+    soln = root_scalar(
+        _length_residual,
+        args=(length, eq, s, theta0, zeta0, nl, verbose),
+        bracket=[0.05, 10],
+    )
+    poloidal_turns = soln.root
+    fl = desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nl)
     return fl

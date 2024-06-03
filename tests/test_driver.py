@@ -5,7 +5,11 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 
-from gx_geometry import create_eik_from_vmec, create_eik_from_desc
+from gx_geometry import (
+    create_eik_from_vmec,
+    create_eik_from_desc,
+    create_eik_from_desc_given_length,
+)
 
 from . import TEST_DIR
 
@@ -34,24 +38,38 @@ class Tests(unittest.TestCase):
     def test_vmec_driver(self):
         filename_base = "wout_w7x_from_gx_repository.nc"
         filename = os.path.join(TEST_DIR, filename_base)
-        create_eik_from_vmec(filename)
-        create_eik_from_vmec(filename, eik_filename="eik.nc")
+        s = 0.64
+        create_eik_from_vmec(filename, s=s)
+        create_eik_from_vmec(filename, s=s, eik_filename="eik.nc")
 
     def test_desc_driver(self):
         filename_base = "w7x_from_gx_repository_LMN8.h5"
         filename = os.path.join(TEST_DIR, filename_base)
-        create_eik_from_desc(filename)
-        create_eik_from_desc(filename, eik_filename="eik.nc")
+        s = 0.9
+        create_eik_from_desc(filename, s=s)
+        create_eik_from_desc(filename, s=s, eik_filename="eik.nc")
+
+    def test_desc_driver_from_length(self):
+        filename_base = "w7x_from_gx_repository_LMN8.h5"
+        filename = os.path.join(TEST_DIR, filename_base)
+        s = 1.0
+        Rmajor = 5.5
+        length = 2 * np.pi * Rmajor * 2
+        create_eik_from_desc_given_length(filename, s=s, length=length)
+        create_eik_from_desc_given_length(
+            filename, s=s, length=length, eik_filename="eik.nc"
+        )
 
     def test_vmec_driver_symmetric(self):
         """GX geometry inputs should be stellarator symmetric when expected."""
         filename_base = "wout_w7x_from_gx_repository.nc"
         filename = os.path.join(TEST_DIR, filename_base)
         nfp = 5
+        s = 0.5
         for theta0 in [0, np.pi]:
             for zeta0 in [0, np.pi / nfp]:
                 print("theta0:", theta0, " zeta0:", zeta0)
-                fl = create_eik_from_vmec(filename, theta0=theta0, zeta0=zeta0)
+                fl = create_eik_from_vmec(filename, s=s, theta0=theta0, zeta0=zeta0)
                 check_field_line_symmetry(fl)
 
     def test_desc_driver_symmetric(self):
@@ -59,10 +77,11 @@ class Tests(unittest.TestCase):
         filename_base = "w7x_from_gx_repository_LMN8.h5"
         filename = os.path.join(TEST_DIR, filename_base)
         nfp = 5
+        s = 0.25
         for theta0 in [0, np.pi]:
             for zeta0 in [0, np.pi / nfp]:
                 print("theta0:", theta0, " zeta0:", zeta0)
-                fl = create_eik_from_desc(filename, theta0=theta0, zeta0=zeta0)
+                fl = create_eik_from_desc(filename, s=s, theta0=theta0, zeta0=zeta0)
                 check_field_line_symmetry(fl)
 
 

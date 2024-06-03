@@ -5,6 +5,7 @@ from .util import mu_0
 
 __all__ = ["uniform_arclength", "add_gx_definitions"]
 
+
 def uniform_arclength(fl1):
     """
     Given data along fieldlines, interpolate the data onto a parallel coordinate
@@ -21,7 +22,6 @@ def uniform_arclength(fl1):
     fl2.arclength = np.zeros_like(fl1.modB)
     # We will over-write the functions of z, but the above command is a
     # convenint way to initialize arrays of the correct shape.
-
 
     """
     # Differentiation matrix for a uniform grid:
@@ -45,7 +45,9 @@ def uniform_arclength(fl1):
     """
 
     # Interpolate to "half grid":
-    inv_gradpar1 = 0.5 * (1 / fl1.gradpar_theta_pest[1:] + 1 / fl1.gradpar_theta_pest[:-1])
+    inv_gradpar1 = 0.5 * (
+        1 / fl1.gradpar_theta_pest[1:] + 1 / fl1.gradpar_theta_pest[:-1]
+    )
     # Compute physical arclength along flux tube:
     dz1 = fl1.theta_pest[1] - fl1.theta_pest[0]
     fl2.arclength = dz1 * np.concatenate(([0], np.cumsum(inv_gradpar1)))
@@ -69,14 +71,15 @@ def uniform_arclength(fl1):
         var = fl1.__getattribute__(varname)
         if isinstance(var, np.ndarray) and varname != "z":
             interpolator = interp1d(
-                fl1.z, 
+                fl1.z,
                 var,
                 kind="cubic",
                 fill_value="extrapolate",
             )
-            fl2.__getattribute__(varname)[:] = interpolator(uniform_z_grid)                    
+            fl2.__getattribute__(varname)[:] = interpolator(uniform_z_grid)
 
     return fl2
+
 
 def add_gx_definitions(fl, sigma_Bxy):
     """
@@ -93,20 +96,36 @@ def add_gx_definitions(fl, sigma_Bxy):
     fl.gds21 = sigma_Bxy * fl.grad_alpha_dot_grad_psi * fl.shat / fl.B_reference
 
     fl.gbdrift = (
-        2 * sigma_Bxy * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
-        * fl.sqrt_s * fl.B_cross_grad_B_dot_grad_alpha 
-        / (fl.modB ** 3)
+        2
+        * sigma_Bxy
+        * fl.toroidal_flux_sign
+        * fl.B_reference
+        * fl.L_reference
+        * fl.L_reference
+        * fl.sqrt_s
+        * fl.B_cross_grad_B_dot_grad_alpha
+        / (fl.modB**3)
     )
 
     fl.cvdrift = (
-        fl.gbdrift 
-        + 2 * mu_0 * sigma_Bxy * fl.toroidal_flux_sign * fl.B_reference * fl.L_reference * fl.L_reference 
-        * fl.sqrt_s * fl.d_pressure_d_s
+        fl.gbdrift
+        + 2
+        * mu_0
+        * sigma_Bxy
+        * fl.toroidal_flux_sign
+        * fl.B_reference
+        * fl.L_reference
+        * fl.L_reference
+        * fl.sqrt_s
+        * fl.d_pressure_d_s
         / (fl.edge_toroidal_flux_over_2pi * fl.modB * fl.modB)
     )
 
     fl.gbdrift0 = (
-        2 * fl.toroidal_flux_sign * fl.shat * fl.B_cross_grad_B_dot_grad_psi
+        2
+        * fl.toroidal_flux_sign
+        * fl.shat
+        * fl.B_cross_grad_B_dot_grad_psi
         / (fl.modB * fl.modB * fl.modB * fl.sqrt_s)
     )
 

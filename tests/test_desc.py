@@ -14,6 +14,7 @@ from desc.profiles import PowerSeriesProfile
 
 from gx_geometry import (
     desc_fieldline,
+    desc_fieldline_specified_length,
     Vmec,
     vmec_fieldline,
     uniform_arclength,
@@ -141,6 +142,7 @@ class Tests(unittest.TestCase):
         fl1 = desc_fieldline(eq, s, alpha, theta1d=theta1d)
         vmec = Vmec(filename)
         fl2 = vmec_fieldline(vmec, s, alpha, theta1d=theta1d)
+        np.testing.assert_allclose(fl1.length, fl2.length, rtol=8e-5)
 
         plot_all_quantities = False
         if plot_all_quantities:
@@ -417,6 +419,7 @@ class Tests(unittest.TestCase):
         theta1d = np.linspace(-2 * np.pi, 2 * np.pi, ntheta)
         fl1 = desc_fieldline(eq, s, alpha_desc, theta1d=theta1d)
         fl2 = vmec_fieldline(vmec, s, alpha_vmec, theta1d=theta1d)
+        np.testing.assert_allclose(fl1.length, fl2.length, rtol=5e-5)
 
         plot_all_quantities = False
         if plot_all_quantities:
@@ -605,6 +608,7 @@ class Tests(unittest.TestCase):
         fl2 = vmec_fieldline(
             vmec, s, alpha_vmec, theta1d=theta1d_vmec, phi_center=zeta0
         )
+        np.testing.assert_allclose(fl1.length, fl2.length, rtol=6e-5)
 
         plot_all_quantities = False
         if plot_all_quantities:
@@ -755,6 +759,21 @@ class Tests(unittest.TestCase):
             np.testing.assert_allclose(fl3.cvdrift, np.flip(fl4.cvdrift), atol=0.028)
             np.testing.assert_allclose(fl3.gbdrift0, np.flip(fl4.gbdrift0), atol=0.0017)
             np.testing.assert_allclose(fl3.cvdrift0, np.flip(fl4.cvdrift0), atol=0.0017)
+
+    def test_solve_for_length(self):
+        filename_base = "w7x_from_gx_repository_LMN8.h5"
+        filename = os.path.join(TEST_DIR, filename_base)
+        eq = desc.io.load(filename)
+
+        s = 1.0
+        theta0 = np.pi / 3
+        zeta0 = 0.8 * np.pi / 5
+        nz = 65
+        Rmajor = 5.5
+        length = 2 * np.pi * Rmajor
+
+        fl = desc_fieldline_specified_length(eq, s, theta0, zeta0, nz, length)
+        np.testing.assert_allclose(fl.length, length, atol=1e-13)
 
 
 if __name__ == "__main__":
