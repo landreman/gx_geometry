@@ -7,12 +7,18 @@ import logging
 import numpy as np
 
 from gx_geometry.util import Struct
-from gx_geometry import uniform_arclength, Vmec, vmec_fieldline
+from gx_geometry import (
+    uniform_arclength,
+    Vmec,
+    vmec_fieldline,
+    resample,
+    vmec_fieldline_from_center,
+)
 
 from . import TEST_DIR
 
 logger = logging.getLogger(__name__)
-#logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 
 class UniformArclengthTests(unittest.TestCase):
@@ -56,13 +62,17 @@ class UniformArclengthTests(unittest.TestCase):
                 np.testing.assert_allclose(var1[0], var2[0], atol=1e-12)
                 np.testing.assert_allclose(var1[-1], var2[-1], atol=1e-12)
                 # Max and min should match:
-                np.testing.assert_allclose(np.max(var1, axis=2), np.max(var2, axis=2), rtol=0.03, atol=1e-12)
-                np.testing.assert_allclose(np.min(var1, axis=2), np.min(var2, axis=2), rtol=0.03, atol=1e-12)
-        
+                np.testing.assert_allclose(
+                    np.max(var1, axis=2), np.max(var2, axis=2), rtol=0.03, atol=1e-12
+                )
+                np.testing.assert_allclose(
+                    np.min(var1, axis=2), np.min(var2, axis=2), rtol=0.03, atol=1e-12
+                )
+
         # Compute arclength another way
         L = np.trapz(1 / fl1.gradpar_theta_pest, fl1.theta_pest)
         np.testing.assert_allclose(L, fl2.arclength[-1])
-    
+
         """
         # Check that linear solve was correct:
         for js in range(fl1.ns):
@@ -78,6 +88,49 @@ class UniformArclengthTests(unittest.TestCase):
                 np.testing.assert_allclose(fl2.D @ (fl1.z[js, jalpha, :] +
                 np.pi), rhs)
         """
+
+
+class ResampleTests(unittest.TestCase):
+    def test_2_ways(self):
+        """
+        If you make a field line at nz1 and resample to nz2, it should
+        match a field line created originally at nz2.
+        """
+
+        nz1 = 400
+        nz2 = 251
+
+        filename_base = "wout_w7x_from_gx_repository.nc"
+        filename = os.path.join(TEST_DIR, filename_base)
+        vmec = Vmec(filename)
+        s = 0.9
+        theta0 = np.pi / 3
+        zeta0 = 0.8 * np.pi / 5
+        poloidal_turns = 0.7
+        types_to_compare = (int, float, np.ndarray)
+
+        # Lower the resolution:
+        fl1 = vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nz1)
+        fl1 = uniform_arclength(fl1)
+        fl2 = resample(fl1, nz2)
+        fl3 = vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nz2)
+        fl3 = uniform_arclength(fl3)
+        varnames = set(dir(fl2) + dir(fl3))
+        for varname in varnames:
+            var1 = fl2.__getattribute__(varname)
+            var2 = fl3.__getattribute__(varname)
+            if isinstance(var1, types_to_compare):
+                np.testing.assert_allclose(var1, var2, rtol=3e-4, atol=3e-4)
+
+        # Raise the resolution:
+        fl4 = resample(fl3, nz1)
+        varnames = set(dir(fl1) + dir(fl4))
+        for varname in varnames:
+            var1 = fl1.__getattribute__(varname)
+            var2 = fl4.__getattribute__(varname)
+            if isinstance(var1, types_to_compare):
+                np.testing.assert_allclose(var1, var2, rtol=3e-4, atol=3e-4)
+
 
 if __name__ == "__main__":
     unittest.main()

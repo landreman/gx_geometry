@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import interp1d
 from .util import mu_0
 
-__all__ = ["uniform_arclength", "add_gx_definitions"]
+__all__ = ["uniform_arclength", "add_gx_definitions", "resample"]
 
 
 def uniform_arclength(fl1):
@@ -132,3 +132,25 @@ def add_gx_definitions(fl, sigma_Bxy):
     fl.cvdrift0 = fl.gbdrift0
 
     return fl
+
+
+def resample(fl, nz):
+    """Resample to a different number of z grid points."""
+    fl2 = copy.deepcopy(fl)
+    z_new = np.linspace(-np.pi, np.pi, nz)
+    for varname in dir(fl):
+        var = fl.__getattribute__(varname)
+        if isinstance(var, np.ndarray) and varname != "z":
+            interpolator = interp1d(
+                fl.z,
+                var,
+                kind="cubic",
+                fill_value="extrapolate",
+            )
+            fl2.__setattr__(varname, interpolator(z_new))
+
+    fl2.z = z_new
+    fl2.nl = nz
+    fl2.nphi = nz
+
+    return fl2
