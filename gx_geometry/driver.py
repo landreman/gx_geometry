@@ -7,7 +7,7 @@ try:
 except ImportError:
     pass
 
-from .gx_grid import uniform_arclength, add_gx_definitions
+from .gx_grid import uniform_arclength, add_gx_definitions, resample
 from .eik_files import write_eik
 from .vmec import Vmec
 from .vmec_diagnostics import vmec_fieldline_from_center
@@ -44,13 +44,15 @@ def create_eik_from_vmec(
         fl: A Struct containing the field line data.
     """
     assert s is not None
+    nz_big = max(1001, nz * 3)
     vmec = Vmec(filename)
-    fl1 = vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nz)
+    fl1 = vmec_fieldline_from_center(vmec, s, theta0, zeta0, poloidal_turns, nz_big)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
-    write_eik(fl2, eik_filename)
+    fl3 = resample(fl2, nz)
+    write_eik(fl3, eik_filename)
 
-    return fl2
+    return fl3
 
 
 def create_eik_from_desc(
@@ -86,12 +88,14 @@ def create_eik_from_desc(
             pass
 
     assert s is not None
-    fl1 = desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nz)
+    nz_big = max(1001, nz * 3)
+    fl1 = desc_fieldline_from_center(eq, s, theta0, zeta0, poloidal_turns, nz_big)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
-    write_eik(fl2, eik_filename)
+    fl3 = resample(fl2, nz)
+    write_eik(fl3, eik_filename)
 
-    return fl2
+    return fl3
 
 
 def create_eik_from_desc_given_length(
@@ -127,9 +131,11 @@ def create_eik_from_desc_given_length(
             pass
 
     assert s is not None
-    fl1 = desc_fieldline_specified_length(eq, s, theta0, zeta0, nz, length)
+    nz_big = max(1001, nz * 3)
+    fl1 = desc_fieldline_specified_length(eq, s, theta0, zeta0, nz_big, length)
     fl2 = uniform_arclength(fl1)
     add_gx_definitions(fl2, sigma_Bxy)
-    write_eik(fl2, eik_filename)
+    fl3 = resample(fl2, nz)
+    write_eik(fl3, eik_filename)
 
-    return fl2
+    return fl3

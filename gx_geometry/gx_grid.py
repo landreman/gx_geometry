@@ -82,7 +82,7 @@ def uniform_arclength(fl1):
 
 
 def add_gx_definitions(fl, sigma_Bxy):
-    """
+    r"""
     Add the quantities gds21, gbdrift, gbdrift0, cvdrift, and cvdrift0 to a
     field line structure
 
