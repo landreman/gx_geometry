@@ -152,5 +152,7 @@ def resample(fl, nz):
     fl2.z = z_new
     fl2.nl = nz
     fl2.nphi = nz
+    # It seems the interpolation can introduce machine-precision-scale variation in gradpar which causes gx to reject the geometry file. The next line fixes this:
+    fl2.gradpar[:] = np.mean(fl2.gradpar)
 
     return fl2
