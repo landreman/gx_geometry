@@ -32,7 +32,7 @@ jobs:
 
     - name: Install specific version of desc
       run: |
-        pip install git+https://github.com/PlasmaControl/DESC.git@b10f8c8be9d3e751684e5d34abecaf5cd40b2205
+        pip install git+https://github.com/PlasmaControl/DESC.git@v0.12.0
 
     - name: Install python dependencies
       run: |
