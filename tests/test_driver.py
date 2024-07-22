@@ -72,6 +72,19 @@ class Tests(unittest.TestCase):
                 fl = create_eik_from_vmec(filename, s=s, theta0=theta0, zeta0=zeta0)
                 check_field_line_symmetry(fl)
 
+    def test_vmec_driver_symmetric_cut(self):
+        """GX geometry inputs should be stellarator symmetric when expected."""
+        filename_base = "wout_w7x_from_gx_repository.nc"
+        filename = os.path.join(TEST_DIR, filename_base)
+        nfp = 5
+        s = 0.5
+        params = {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}}
+        for theta0 in [0, np.pi]:
+            for zeta0 in [0, np.pi / nfp]:
+                print("theta0:", theta0, " zeta0:", zeta0)
+                fl = create_eik_from_vmec(filename, s=s, theta0=theta0, zeta0=zeta0, **params)
+                check_field_line_symmetry(fl)
+
     def test_desc_driver_symmetric(self):
         """GX geometry inputs should be stellarator symmetric when expected."""
         filename_base = "w7x_from_gx_repository_LMN8.h5"
@@ -82,6 +95,19 @@ class Tests(unittest.TestCase):
             for zeta0 in [0, np.pi / nfp]:
                 print("theta0:", theta0, " zeta0:", zeta0)
                 fl = create_eik_from_desc(filename, s=s, theta0=theta0, zeta0=zeta0)
+                check_field_line_symmetry(fl)
+
+    def test_desc_driver_symmetric_cut(self):
+        """GX geometry inputs should be stellarator symmetric when expected."""
+        filename_base = "w7x_from_gx_repository_LMN8.h5"
+        filename = os.path.join(TEST_DIR, filename_base)
+        nfp = 5
+        s = 0.25
+        params = {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}}
+        for theta0 in [0, np.pi]:
+            for zeta0 in [0, np.pi / nfp]:
+                print("theta0:", theta0, " zeta0:", zeta0)
+                fl = create_eik_from_desc(filename, s=s, theta0=theta0, zeta0=zeta0, **params)
                 check_field_line_symmetry(fl)
 
 
