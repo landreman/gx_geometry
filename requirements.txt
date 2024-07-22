@@ -1,6 +1,6 @@
 numpy
 scipy
 matplotlib
-desc-opt=0.12.0
+desc-opt==0.12.0
 netcdf4
 toml
