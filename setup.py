@@ -8,5 +8,8 @@ setup(
     author_email="mattland@umd.edu",
     # description='Description',
     packages=find_packages(),
+    entry_points = {
+        'console_scripts': ['gx_geometry=gx_geometry.module:run_module'],
+    }
     # install_requires=['numpy >= 1.11.1', 'matplotlib >= 1.5.1'],
 )

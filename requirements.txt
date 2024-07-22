@@ -3,3 +3,4 @@ scipy
 matplotlib
 desc-opt
 netcdf4
+toml
