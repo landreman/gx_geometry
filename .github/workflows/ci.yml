@@ -30,18 +30,6 @@ jobs:
         python -m pip install --upgrade pip
         pip --version
 
-    - name: Install specific version of netcdf4 to avoid CI error (2024-07-22)
-      run: |
-        pip install "netcdf4<1.7"
-  
-    - name: Install specific version of desc
-      run: |
-        pip install git+https://github.com/PlasmaControl/DESC.git@b10f8c8be9d3e751684e5d34abecaf5cd40b2205
-
-    - name: Install python dependencies
-      run: |
-        pip install -r requirements.txt
-
     - name: Install package
       run: pip install -v .
 

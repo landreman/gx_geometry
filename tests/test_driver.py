@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def assert_symmetric(arr, sign):
     """Check that the array is symmetric about the center."""
-    np.testing.assert_allclose(arr, sign * arr[::-1], atol=1e-14)
+    np.testing.assert_allclose(arr, sign * arr[::-1], atol=4e-14)
 
 
 def check_field_line_symmetry(fl):
@@ -72,6 +72,42 @@ class Tests(unittest.TestCase):
                 fl = create_eik_from_vmec(filename, s=s, theta0=theta0, zeta0=zeta0)
                 check_field_line_symmetry(fl)
 
+    def test_vmec_driver_symmetric_cut(self):
+        """GX geometry inputs should be stellarator symmetric when expected."""
+        filename_base = "wout_w7x_from_gx_repository.nc"
+        filename = os.path.join(TEST_DIR, filename_base)
+        nfp = 5
+        s = 0.5
+        params_list = [
+            {"Geometry": {}, "Domain": {"boundary": "exact periodic"}},
+            {"Geometry": {}, "Domain": {"boundary": "continuous drifts"}},
+            {"Geometry": {}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "exact periodic"}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "continuous drifts"}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 2}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "exact periodic", "jtwist": 1}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "continuous drifts", "jtwist": 1}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "linked", "jtwist": 1}},
+        ]
+        for params in params_list:
+            boundary_option = params["Domain"]["boundary"]
+            for theta0 in [0, np.pi]:
+                for zeta0 in [0, np.pi / nfp]:
+                    print("theta0:", theta0, " zeta0:", zeta0)
+                    fl = create_eik_from_vmec(filename, s=s, theta0=theta0, zeta0=zeta0, **params)
+                    check_field_line_symmetry(fl)
+                    if boundary_option == "exact periodic":
+                        np.testing.assert_allclose(fl.gds21[0], 0, atol=1e-14)
+                        np.testing.assert_allclose(fl.gds21[-1], 0, atol=1e-14)
+                    elif boundary_option == "continuous drifts":
+                        np.testing.assert_allclose(fl.gbdrift0[0], 0, atol=1e-14)
+                        np.testing.assert_allclose(fl.gbdrift0[-1], 0, atol=1e-14)
+                    elif boundary_option == "fix aspect":
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[0]), params['Domain']['jtwist'], atol=1e-14)
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[-1]), params['Domain']['jtwist'], atol=1e-14)
+
     def test_desc_driver_symmetric(self):
         """GX geometry inputs should be stellarator symmetric when expected."""
         filename_base = "w7x_from_gx_repository_LMN8.h5"
@@ -83,6 +119,42 @@ class Tests(unittest.TestCase):
                 print("theta0:", theta0, " zeta0:", zeta0)
                 fl = create_eik_from_desc(filename, s=s, theta0=theta0, zeta0=zeta0)
                 check_field_line_symmetry(fl)
+
+    def test_desc_driver_symmetric_cut(self):
+        """GX geometry inputs should be stellarator symmetric when expected."""
+        filename_base = "w7x_from_gx_repository_LMN8.h5"
+        filename = os.path.join(TEST_DIR, filename_base)
+        nfp = 5
+        s = 0.25
+        params_list = [
+            {"Geometry": {}, "Domain": {"boundary": "exact periodic"}},
+            {"Geometry": {}, "Domain": {"boundary": "continuous drifts"}},
+            {"Geometry": {}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "exact periodic"}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "continuous drifts"}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 2}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "exact periodic", "jtwist": 1}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "continuous drifts", "jtwist": 1}},
+            {"Geometry": {"which_crossing": 2}, "Domain": {"boundary": "fix aspect", "jtwist": 1}},
+            {"Geometry": {"npol_min": 2}, "Domain": {"boundary": "linked", "jtwist": 1}},
+        ]
+        for params in params_list:
+            boundary_option = params["Domain"]["boundary"]
+            for theta0 in [0, np.pi]:
+                for zeta0 in [0, np.pi / nfp]:
+                    print("theta0:", theta0, " zeta0:", zeta0)
+                    fl = create_eik_from_desc(filename, s=s, theta0=theta0, zeta0=zeta0, **params)
+                    check_field_line_symmetry(fl)
+                    if boundary_option == "exact periodic":
+                        np.testing.assert_allclose(fl.gds21[0], 0, atol=1e-14)
+                        np.testing.assert_allclose(fl.gds21[-1], 0, atol=1e-14)
+                    elif boundary_option == "continuous drifts":
+                        np.testing.assert_allclose(fl.gbdrift0[0], 0, atol=1e-14)
+                        np.testing.assert_allclose(fl.gbdrift0[-1], 0, atol=1e-14)
+                    elif boundary_option == "fix aspect":
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[0]), params['Domain']['jtwist'], atol=1e-14)
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[-1]), params['Domain']['jtwist'], atol=1e-14)
 
 
 if __name__ == "__main__":

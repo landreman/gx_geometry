@@ -2,4 +2,5 @@ numpy
 scipy
 matplotlib
 desc-opt
-netcdf4
+netcdf4<1.7  # Due to github issue #2
+toml
