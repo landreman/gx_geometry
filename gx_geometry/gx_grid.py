@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from scipy.interpolate import interp1d, CubicSpline
+from scipy.interpolate import interp1d, CubicSpline, splrep, PPoly
 from .util import mu_0
 
 __all__ = ["uniform_arclength", "add_gx_definitions", "resample"]
@@ -172,7 +172,6 @@ def cut_field_line(fl, **params):
         print("You have chosen to cut the flux tube to enforce exact periodicity (gds21=0)")
         print("***************************************************************************")
     
-        from scipy.interpolate import splrep, PPoly
         tck = splrep(fl.theta_pest, fl.gds21, s=0)
         ppoly = PPoly.from_spline(tck)
         gds21_roots = ppoly.roots(extrapolate=False)
@@ -187,7 +186,6 @@ def cut_field_line(fl, **params):
         print("You have chosen to cut the flux tube to enforce continuous magnetic drifts (gbdrift0=0)")
         print("***************************************************************************************")
         
-        from scipy.interpolate import splrep, PPoly
         tck = splrep(fl.theta_pest, fl.gbdrift0, s=0)
         ppoly = PPoly.from_spline(tck)
         gbdrift0_roots = ppoly.roots(extrapolate=False)

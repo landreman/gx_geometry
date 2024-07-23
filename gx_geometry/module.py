@@ -1,16 +1,15 @@
 import sys
-import os
 import toml
 from gx_geometry.driver import create_eik_from_vmec, create_eik_from_desc
 
-def run_module():
+def run_module(args):
     
     # read parameters from input file
-    input_file = sys.argv[1]
+    input_file = args[1]
     
-    if len(sys.argv) > 2:
+    if len(args) > 2:
         stem = input_file[:-3]
-        eiknc = sys.argv[2]
+        eiknc = args[2]
     else:
         stem = input_file[:-3]
         eiknc = stem + ".eik.nc"
@@ -51,4 +50,4 @@ def run_module():
         create_eik_from_desc(filename, s=s, nz=nz+1, poloidal_turns=npol, theta0=0, zeta0=zeta_center, eik_filename=eiknc, **params)
     
 if __name__ == "__main__":
-    run_module()
+    run_module(sys.argv)
