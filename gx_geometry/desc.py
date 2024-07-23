@@ -17,7 +17,7 @@ __all__ = [
 
 def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
     phi_center = zeta0
-    nfp = eq.NFP
+    nfp = int(eq.NFP)
     psi = float(eq.Psi / (2 * np.pi))
     toroidal_flux_sign = np.sign(psi)
     rho = np.sqrt(s)

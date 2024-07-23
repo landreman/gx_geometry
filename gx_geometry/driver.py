@@ -21,7 +21,7 @@ __all__ = [
 
 def create_eik_from_vmec(
     filename,
-    s=None,
+    s,
     theta0=0,
     zeta0=0,
     nz=49,
@@ -40,12 +40,11 @@ def create_eik_from_vmec(
         poloidal_turns: Number of poloidal turns to cover in the parallel direction.
         sigma_Bxy: (1 / |B|^2) \vec{B} \cdot \nabla x \times \nabla y, usually -1.
         eik_filename: Name of the eik file to save. If name ends in '.nc' file will be written in NetCDF format, otherwise it will be written in plain-text format
-        params: dictionary of parameters from GX input file
+        params: (optional) dictionary of parameters from GX input file, for specifying where to cut the field line in z.
 
     Returns:
         fl: A Struct containing the field line data.
     """
-    assert s is not None, "Must specify s"
     npol_min = params.get('Geometry', {}).get("npol_min", None)
     if npol_min is not None:
         poloidal_turns = 3*npol_min
@@ -63,7 +62,7 @@ def create_eik_from_vmec(
 
 def create_eik_from_desc(
     eq,
-    s=None,
+    s,
     theta0=0,
     zeta0=0,
     nz=49,
@@ -82,7 +81,7 @@ def create_eik_from_desc(
         poloidal_turns: Number of poloidal turns to cover in the parallel direction.
         sigma_Bxy: (1 / |B|^2) \vec{B} \cdot \nabla x \times \nabla y, usually -1.
         eik_filename: Name of the eik file to save.
-        params: dictionary of parameters from GX input file
+        params: (optional) dictionary of parameters from GX input file, for specifying where to cut the field line in z.
 
     Returns:
         fl: A Struct containing the field line data.
@@ -95,7 +94,6 @@ def create_eik_from_desc(
         except:
             pass
 
-    assert s is not None, "Must specify s"
     npol_min = params.get('Geometry', {}).get("npol_min", None)
     if npol_min is not None:
         poloidal_turns = 3*npol_min
@@ -112,7 +110,7 @@ def create_eik_from_desc(
 
 def create_eik_from_desc_given_length(
     eq,
-    s=None,
+    s,
     theta0=0,
     zeta0=0,
     nz=49,
@@ -142,7 +140,6 @@ def create_eik_from_desc_given_length(
         except:
             pass
 
-    assert s is not None
     nz_big = max(1001, nz * 3)
     fl1 = desc_fieldline_specified_length(eq, s, theta0, zeta0, nz_big, length)
     fl2 = uniform_arclength(fl1)

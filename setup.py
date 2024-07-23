@@ -10,7 +10,7 @@ requirements = parse_requirements('requirements.txt')
 
 setup(
     name="gx_geometry",
-    version="0.0.1",
+    version="0.0.2",
     url="https://github.com/landreman/gx_geometry.git",
     author="Matt Landreman",
     author_email="mattland@umd.edu",

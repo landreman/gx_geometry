@@ -77,28 +77,27 @@ def read_eik_netcdf(filename):
     fl.nalpha = 1
     fl.ns = 1
 
-    f = Dataset(filename, mode="r")
-    fl.shat = f.variables["shat"][()]
-    fl.kxfac = f.variables["kxfac"][()]
-    fl.sigma_Bxy = fl.kxfac
-    fl.iota = 1 / f.variables["q"][()]
-    fl.gbdrift = f.variables["gbdrift"][()]
-    fl.gradpar = f.variables["gradpar"][()]
-    fl.grho = f.variables["grho"][()]
-    fl.z = f.variables["theta"][()]
-    fl.cvdrift = f.variables["cvdrift"][()]
-    fl.gds2 = f.variables["gds2"][()]
-    fl.bmag = f.variables["bmag"][()]
-    fl.gds21 = f.variables["gds21"][()]
-    fl.gds22 = f.variables["gds22"][()]
-    fl.cvdrift0 = f.variables["cvdrift0"][()]
-    fl.gbdrift0 = f.variables["gbdrift0"][()]
-    fl.nl = len(fl.bmag)
-    fl.Rmajor_p = f.variables["Rmaj"][()]
-    fl.alpha = f.variables["alpha"][()]
-    fl.phi_center = f.variables["zeta_center"][()]
-    fl.nfp = f.variables["nfp"][()]
-    f.close()
+    with Dataset(filename) as f:
+        fl.shat = f.variables["shat"][()]
+        fl.kxfac = f.variables["kxfac"][()]
+        fl.sigma_Bxy = fl.kxfac
+        fl.iota = 1 / f.variables["q"][()]
+        fl.gbdrift = f.variables["gbdrift"][()]
+        fl.gradpar = f.variables["gradpar"][()]
+        fl.grho = f.variables["grho"][()]
+        fl.z = f.variables["theta"][()]
+        fl.cvdrift = f.variables["cvdrift"][()]
+        fl.gds2 = f.variables["gds2"][()]
+        fl.bmag = f.variables["bmag"][()]
+        fl.gds21 = f.variables["gds21"][()]
+        fl.gds22 = f.variables["gds22"][()]
+        fl.cvdrift0 = f.variables["cvdrift0"][()]
+        fl.gbdrift0 = f.variables["gbdrift0"][()]
+        fl.nl = len(fl.bmag)
+        fl.Rmajor_p = f.variables["Rmaj"][()]
+        fl.alpha = f.variables["alpha"][()]
+        fl.phi_center = f.variables["zeta_center"][()]
+        fl.nfp = f.variables["nfp"][()]
 
     return fl
 

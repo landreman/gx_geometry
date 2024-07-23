@@ -146,3 +146,6 @@ desc_w7x_from_gx_repository_lowRes*
 axisymm.h5
 eik.nc
 .DS_Store
+w7x.eik.nc
+w7x_adiabatic_electrons_desc.eik.nc
+w7x_adiabatic_electrons_vmec.eik.nc

@@ -1,6 +1,6 @@
 numpy
 scipy
 matplotlib
-desc-opt==0.12.0
-netcdf4
+desc-opt
+netcdf4<1.7  # Due to github issue #2
 toml
