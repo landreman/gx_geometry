@@ -3,7 +3,7 @@ import numpy as np
 from scipy.interpolate import interp1d, CubicSpline, splrep, PPoly
 from .util import mu_0
 
-__all__ = ["uniform_arclength", "add_gx_definitions", "resample"]
+__all__ = ["uniform_arclength", "add_gx_definitions", "cut_field_line", "resample"]
 
 
 def uniform_arclength(fl1):
@@ -195,7 +195,7 @@ def cut_field_line(fl, **params):
         
         # determine theta cut
         cut = gbdrift0_roots[which_crossing]
-    if flux_tube_cut == "aspect":
+    elif flux_tube_cut == "aspect":
         print("*************************************************************************")
         print("You have chosen to cut the flux tube to enforce y0/x0 = ", y0/x0)
         print("*************************************************************************")
@@ -229,6 +229,12 @@ def cut_field_line(fl, **params):
 
         # determine theta cut
         cut = crossings[which_crossing]
+
+    elif flux_tube_cut == "none":
+        pass
+
+    else:
+        raise RuntimeError(f"Should not get here. flux_tube_cut: {flux_tube_cut}")
 
     fl2 = copy.deepcopy(fl)
 

@@ -46,8 +46,11 @@ def run_module(args):
         create_eik_from_vmec(filename, s=s, nz=nz+1, poloidal_turns=npol, theta0=0, zeta0=zeta_center, eik_filename=eiknc, **params)
     elif geo_option == "desc":
         rho = params.get("Geometry").get("rhotor")
+        s = rho**2
         filename = params.get("Geometry").get("geo_file")
         create_eik_from_desc(filename, s=s, nz=nz+1, poloidal_turns=npol, theta0=0, zeta0=zeta_center, eik_filename=eiknc, **params)
+    else:
+        raise ValueError(f"Invalid setting for geo_option: {geo_option}")
     
 if __name__ == "__main__":
     run_module(sys.argv)
