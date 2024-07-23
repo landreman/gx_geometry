@@ -104,6 +104,9 @@ class Tests(unittest.TestCase):
                     elif boundary_option == "continuous drifts":
                         np.testing.assert_allclose(fl.gbdrift0[0], 0, atol=1e-14)
                         np.testing.assert_allclose(fl.gbdrift0[-1], 0, atol=1e-14)
+                    elif boundary_option == "fix aspect":
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[0]), params['Domain']['jtwist'], atol=1e-14)
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[-1]), params['Domain']['jtwist'], atol=1e-14)
 
     def test_desc_driver_symmetric(self):
         """GX geometry inputs should be stellarator symmetric when expected."""
@@ -149,6 +152,9 @@ class Tests(unittest.TestCase):
                     elif boundary_option == "continuous drifts":
                         np.testing.assert_allclose(fl.gbdrift0[0], 0, atol=1e-14)
                         np.testing.assert_allclose(fl.gbdrift0[-1], 0, atol=1e-14)
+                    elif boundary_option == "fix aspect":
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[0]), params['Domain']['jtwist'], atol=1e-14)
+                        np.testing.assert_allclose(abs(fl.twist_shift_geo_fac[-1]), params['Domain']['jtwist'], atol=1e-14)
 
 
 if __name__ == "__main__":
