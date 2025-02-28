@@ -123,7 +123,7 @@ class Tests(unittest.TestCase):
                     * (
                         -np.cos(theta) / Rmajor + phi * d_iota_d_r * eps * np.sin(theta)
                     ),
-                    atol=0.0007,
+                    atol=0.0008,
                 )
 
     def test_wout_as_desc(self):

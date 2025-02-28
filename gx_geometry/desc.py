@@ -3,7 +3,7 @@ from scipy.optimize import root_scalar
 
 try:
     from desc.grid import Grid, LinearGrid
-    from desc.compute.utils import cross, dot
+    from desc.utils import cross, dot
 except ImportError:
     pass
 from .util import Struct
