@@ -874,7 +874,7 @@ def vmec_fieldline(
     # Taking element [0] in the next line may not make sense if we have multiple values of s
     # and/or alpha:
     results.length = np.abs(
-        np.trapz(1 / results.gradpar_theta_pest, results.theta_pest)
+        np.trapezoid(1 / results.gradpar_theta_pest, results.theta_pest)
     )[0]
 
     # Add a few more quantities to the results:
