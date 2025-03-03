@@ -1,6 +1,12 @@
 import numpy as np
 from scipy.optimize import root_scalar
 
+from numpy.lib import NumpyVersion
+if NumpyVersion(np.__version__) < '2.0.0':
+    from numpy import trapz as trapezoid
+else:
+    from numpy import trapezoid as trapezoid
+
 try:
     from desc.grid import Grid, LinearGrid
     from desc.utils import cross, dot
@@ -93,7 +99,7 @@ def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
         * (data["B^theta"] * (1 + data["lambda_t"]) + data["B^zeta"] * data["lambda_z"])
         / data["|B|"]
     )
-    length = float(np.abs(np.trapezoid(1 / gradpar_theta_pest, theta_pest)))
+    length = float(np.abs(trapezoid(1 / gradpar_theta_pest, theta_pest)))
 
     grad_psi_dot_grad_psi = np.array(data["|grad(psi)|^2"])
     grad_alpha_dot_grad_psi = np.array(dot(grad_alpha_shifted, data["grad(psi)"]))

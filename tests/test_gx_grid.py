@@ -5,6 +5,11 @@ import os
 import logging
 
 import numpy as np
+from numpy.lib import NumpyVersion
+if NumpyVersion(np.__version__) < '2.0.0':
+    from numpy import trapz as trapezoid
+else:
+    from numpy import trapezoid as trapezoid
 
 from gx_geometry.util import Struct
 from gx_geometry import (
@@ -70,7 +75,7 @@ class UniformArclengthTests(unittest.TestCase):
                 )
 
         # Compute arclength another way
-        L = np.trapezoid(1 / fl1.gradpar_theta_pest, fl1.theta_pest)
+        L = trapezoid(1 / fl1.gradpar_theta_pest, fl1.theta_pest)
         np.testing.assert_allclose(L, fl2.arclength[-1])
 
         """
@@ -78,7 +83,7 @@ class UniformArclengthTests(unittest.TestCase):
         for js in range(fl1.ns):
             for jalpha in range(fl1.nalpha):
                 # Compute physical length of flux tube:
-                L = np.trapezoid(1 / fl1.gradpar_theta_pest[js, jalpha, :], fl1.theta_pest[js, jalpha, :])
+                L = trapezoid(1 / fl1.gradpar_theta_pest[js, jalpha, :], fl1.theta_pest[js, jalpha, :])
                 gradpar2 = 2 * np.pi / L
                 rhs = gradpar2 / fl1.gradpar_theta_pest[js, jalpha, :]
                 print("post D:")

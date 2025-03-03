@@ -14,6 +14,12 @@ import numpy as np
 from scipy.interpolate import interp1d, InterpolatedUnivariateSpline
 from scipy.optimize import newton
 
+from numpy.lib import NumpyVersion
+if NumpyVersion(np.__version__) < '2.0.0':
+    from numpy import trapz as trapezoid
+else:
+    from numpy import trapezoid as trapezoid
+
 from .vmec import Vmec
 from .util import Struct
 
@@ -874,7 +880,7 @@ def vmec_fieldline(
     # Taking element [0] in the next line may not make sense if we have multiple values of s
     # and/or alpha:
     results.length = np.abs(
-        np.trapezoid(1 / results.gradpar_theta_pest, results.theta_pest)
+        trapezoid(1 / results.gradpar_theta_pest, results.theta_pest)
     )[0]
 
     # Add a few more quantities to the results:
