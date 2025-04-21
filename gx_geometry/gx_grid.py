@@ -6,7 +6,7 @@ from .util import mu_0
 __all__ = ["uniform_arclength", "add_gx_definitions", "cut_field_line", "resample"]
 
 
-def uniform_arclength(fl1):
+def uniform_arclength(fl1,verbose=True):
     """
     Given data along fieldlines, interpolate the data onto a parallel coordinate
     in which the differential arclength is uniform.
@@ -78,9 +78,10 @@ def uniform_arclength(fl1):
                 fill_value="extrapolate",
             )
             fl2.__getattribute__(varname)[:] = interpolator(uniform_z_grid)
-
-    print(f"Final (unscaled) theta grid goes from [{fl1.theta_pest[0]}, {fl1.theta_pest[-1]}]")
-    print(f"domain_scaling_factor = {fl2.domain_scaling_factor} so that scaled theta grid is [-pi, pi]")
+            
+    if(verbose=True):
+        print(f"Final (unscaled) theta grid goes from [{fl1.theta_pest[0]}, {fl1.theta_pest[-1]}]")
+        print(f"domain_scaling_factor = {fl2.domain_scaling_factor} so that scaled theta grid is [-pi, pi]")
 
 
     return fl2
