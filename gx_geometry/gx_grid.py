@@ -79,7 +79,7 @@ def uniform_arclength(fl1,verbose=True):
             )
             fl2.__getattribute__(varname)[:] = interpolator(uniform_z_grid)
             
-    if(verbose=True):
+    if(verbose==True):
         print(f"Final (unscaled) theta grid goes from [{fl1.theta_pest[0]}, {fl1.theta_pest[-1]}]")
         print(f"domain_scaling_factor = {fl2.domain_scaling_factor} so that scaled theta grid is [-pi, pi]")
 
