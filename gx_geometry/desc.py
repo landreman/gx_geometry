@@ -51,10 +51,16 @@ def desc_fieldline(eq, s, alpha, theta1d, zeta0=0.0):
     phi = zeta
     rhoa = rho * np.ones(nl)
     c = np.vstack([rhoa, theta, zeta]).T
-    coords = eq.compute_theta_coords(c, tol=1e-10, maxiter=50)
+    coords = eq.map_coordinates(
+        c,
+        inbasis=("rho", "theta_PEST", "zeta"),
+        outbasis=("rho", "theta", "zeta"),
+        tol=1e-10,
+        maxiter=50,
+    )
     theta_desc = np.array(coords[:, 1])
 
-    # desc's compute_theta_coords forces the resulting theta to lie in [0, 2pi].
+    # desc's map_coordinates forces the resulting theta to lie in [0, 2pi].
     # Undo this by assuming that |theta - theta_desc| is < pi.
     multiples_of_2pi_to_shift = np.round((theta - theta_desc) / (2 * np.pi))
     theta_desc += 2 * np.pi * multiples_of_2pi_to_shift
